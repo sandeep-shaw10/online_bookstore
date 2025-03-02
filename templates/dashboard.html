@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %}
+<title>BookHaven | Dashboard</title>
+{% endblock %}
+
+{% block content %}
+<body class="bg-gray-100">
+
+    <!-- Navbar -->
+    <nav class="bg-indigo-600 p-4 text-white flex justify-between items-center">
+        <h1 class="text-xl font-semibold">Dashboard</h1>
+        <div class="flex items-center space-x-4">
+            <span class="font-medium">👋 Hello, {{ user.username }}</span>
+            <a href="{% url 'logout' %}" class="px-4 py-2 bg-red-500 rounded-md hover:bg-red-600 transition">
+                Logout 🚪
+            </a>
+        </div>
+    </nav>
+
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-white shadow-lg p-6">
+            <h2 class="text-lg font-semibold mb-4">Navigation</h2>
+            <ul class="space-y-3">
+
+                {% if user.is_staff %}
+                <li>
+                    <a href="{% url 'admin:index' %}" class="block px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">
+                        🛠️ Admin Panel
+                    </a>
+                </li>
+                {% endif %}
+                
+                <li>
+                    <a href="{% url 'home' %}" class="block px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
+                        🏠 Home 
+                    </a>
+                </li>
+                <li>
+                    <button class="w-full text-left px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600">
+                        👤 View Profile 
+                    </button>
+                </li>
+                <li>
+                    <button class="w-full text-left px-4 py-2 bg-purple-500 text-white rounded-md hover:bg-purple-600">
+                        ⚙️ Settings 
+                    </button>
+                </li>
+                <li>
+                    <button class="w-full text-left px-4 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600">
+                        🔔 Notifications 
+                    </button>
+                </li>
+
+            </ul>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 p-6">
+            <div class="bg-white shadow-md rounded-lg p-6">
+                <h2 class="text-2xl font-semibold text-gray-800 mb-4">
+                    Welcome to your Dashboard, {{ user.username }}! 🎉
+                </h2>
+                <p class="text-gray-600">Manage your profile, settings, and more from here.</p>
+            </div>
+        </main>
+    </div>
+
+</body>
+{% endblock %}

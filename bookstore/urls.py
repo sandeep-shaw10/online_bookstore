@@ -16,7 +16,19 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from .views import *
+
+
+admin.site.site_header = "Online Book Store Admin"  
+admin.site.site_title = "Book Store Admin Portal"  
+admin.site.index_title = "Welcome to Book Store Dashboard"
+
 
 urlpatterns = [
+    path('', home, name='home'),
     path('admin/', admin.site.urls),
+    path('register/', register_view, name='register'),
+    path('login/', login_view, name='login'),
+    path('logout/', logout_view, name='logout'),
+    path('dashboard/', dashboard_view, name='dashboard')
 ]
