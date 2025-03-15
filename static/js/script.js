@@ -125,15 +125,6 @@ document.addEventListener('DOMContentLoaded', function() {
       `;
     }
   
-    // Create category item HTML
-    function createCategoryItem(category) {
-      return `
-        <div class="bg-gray-50 hover:bg-gray-100 rounded-lg p-4 text-center cursor-pointer transition duration-200">
-          <p class="font-medium text-gray-800">${category}</p>
-        </div>
-      `;
-    }
-  
     // Populate books and categories
     function populateContent() {
       // Featured books
@@ -141,9 +132,7 @@ document.addEventListener('DOMContentLoaded', function() {
       
       // New releases
       newReleasesContainer.innerHTML = newReleases.map(book => createBookCard(book)).join('');
-      
-      // Categories
-      categoriesGrid.innerHTML = categories.map(category => createCategoryItem(category)).join('');
+
     }
   
     // Event listeners

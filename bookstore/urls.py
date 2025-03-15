@@ -32,7 +32,12 @@ urlpatterns = [
     path('register/', register_view, name='register'),
     path('login/', login_view, name='login'),
     path('logout/', logout_view, name='logout'),
-    path('dashboard/', dashboard_view, name='dashboard')
+    path('dashboard/', dashboard_view, name='dashboard'),
+    path('dashboard/profile', dashboard_profile, name='dashboard_profile'),
+    path('dashboard/shop', dashboard_shop, name='dashboard_shop'),
+    path("dashboard/shop/book/<int:book_id>/", book_detail, name="book_detail"),
+    path("dashboard/profile/", profile, name="profile"),
+    path("add-money/", add_money, name="add_money"),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

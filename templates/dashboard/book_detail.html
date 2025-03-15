@@ -1,0 +1,54 @@
+<main class="flex-1 p-4 md:p-6">
+    <div class="bg-white shadow-md rounded-lg p-4 md:p-6">
+
+        <!-- Back Button -->
+        <a href="{% url 'dashboard_shop' %}" class="mb-4 inline-flex items-center px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition duration-300">
+            ⬅️ Back to Shop
+        </a>
+
+        <div class="flex flex-col md:flex-row items-center md:items-start space-y-4 md:space-y-0 md:space-x-6">
+            <!-- Book Cover -->
+            <img src="{{ book.cover_image.url }}" alt="{{ book.name }}" class="w-48 h-64 md:w-64 md:h-80 object-cover rounded-lg shadow-md">
+
+            <!-- Book Details -->
+            <div class="text-center md:text-left">
+                <h2 class="text-2xl md:text-3xl font-semibold text-gray-800">{{ book.name }}</h2>
+
+                <!-- Authors with Images -->
+                <div class="flex items-center justify-center md:justify-start space-x-4 mt-2">
+                    {% for author in book.authors.all %}
+                        <div class="flex items-center space-x-2">
+                            {% if author.image %}
+                                <img src="{{ author.image.url }}" alt="{{ author.name }}" class="w-10 h-10 object-cover rounded-full border border-gray-300">
+                            {% else %}
+                                <span class="w-10 h-10 flex items-center justify-center bg-gray-300 text-gray-700 rounded-full">📖</span>
+                            {% endif %}
+                            <span class="text-gray-600">{{ author.name }}</span>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <p class="text-gray-600 mt-2"><strong>Category:</strong> 
+                    {% for category in book.categories.all %}
+                        {{ category.name }}{% if not forloop.last %}, {% endif %}
+                    {% endfor %}
+                </p>
+                <p class="text-gray-600 mt-2"><strong>Edition:</strong> {{ book.edition|default:"N/A" }}</p>
+                <p class="text-gray-600 mt-2"><strong>Publisher:</strong> {{ book.publisher|default:"N/A" }}</p>
+                <p class="text-gray-600 mt-2"><strong>Year:</strong> {{ book.publication_year|default:"N/A" }}</p>
+                <p class="text-gray-800 font-semibold text-xl mt-4">$ {{ book.price }}</p>
+
+                <!-- Add to Cart Button -->
+                <button class="mt-4 px-6 py-3 bg-green-500 text-white font-semibold rounded-md hover:bg-green-600 transition duration-300 ease-in-out">
+                    🛒 Add to Cart
+                </button>
+            </div>
+        </div>
+
+        <!-- Summary -->
+        <div class="mt-6 text-center md:text-left">
+            <h3 class="text-lg md:text-xl font-semibold">📖 Book Summary</h3>
+            <p class="text-gray-600 mt-2">{{ book.summary }}</p>
+        </div>
+    </div>
+</main>
