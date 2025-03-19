@@ -69,3 +69,12 @@ class Requisition(models.Model):
 
     def __str__(self):
         return f'{self.book_name} requested by {self.customer.user.username}'
+    
+
+class Cart(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)  # Each cart belongs to a user
+    book = models.ForeignKey(Book, on_delete=models.CASCADE)  # The book being added
+    quantity = models.PositiveIntegerField(default=1)  # Quantity of the book
+
+    def __str__(self):
+        return f"{self.user.username} - {self.book.name} (x{self.quantity})"

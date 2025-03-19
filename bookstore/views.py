@@ -6,7 +6,7 @@ from django.contrib.auth.models import User
 from store.models import Book, Writer, Category
 from django.contrib import messages
 from django.contrib.auth import update_session_auth_hash
-from customer.models import Customer
+from customer.models import Cart
 from decimal import Decimal
 import random
 
@@ -129,15 +129,17 @@ def dashboard_shop(request):
 @login_required(login_url='login')
 def book_detail(request, book_id):
     book = get_object_or_404(Book, id=book_id)
+    cart_items = Cart.objects.filter(user=request.user).values_list('book_id', flat=True)
     return render(request, "dashboard/main.html", {
         "template_name": "dashboard/book_detail.html", 
-        "book": book
+        "book": book,
+        'cart_items': cart_items
     })
 # Authentication -----------------
 
 
 
-@login_required
+@login_required(login_url='login')
 def profile(request):
     if request.method == "POST":
         full_name = request.POST.get("full_name", "").strip()
@@ -167,7 +169,7 @@ def profile(request):
         "template_name": "dashboard/profile.html"
     })
 
-@login_required
+@login_required(login_url='login')
 def add_money(request):
     if request.method == "POST":
         amount = request.POST.get("amount")
@@ -183,3 +185,63 @@ def add_money(request):
             messages.error(request, "Enter a valid number!")
     
     return redirect("profile")
+
+
+## CART -----------------
+@login_required(login_url='login')
+def add_to_cart(request, book_id):
+    book = Book.objects.get(id=book_id)
+    cart_item, created = Cart.objects.get_or_create(user=request.user, book=book)
+
+    if not created:
+        cart_item.quantity += 1  # Increase quantity if book is already in cart
+        cart_item.save()
+    
+    messages.success(request, "Book added to cart!")
+    return redirect('cart_view')  # Redirect to cart page
+
+
+@login_required(login_url='login')
+def cart_view(request):
+    cart_items = Cart.objects.filter(user=request.user)
+    total_price = sum(item.book.price * item.quantity for item in cart_items)
+    
+    return render(request, "dashboard/main.html", {
+        "template_name": "dashboard/cart.html",
+        "cart_items": cart_items,
+        "total_price": total_price
+    })
+
+
+@login_required(login_url='login')
+def remove_from_cart(request, cart_id):
+    cart_item = Cart.objects.filter(id=cart_id, user=request.user).first()
+    
+    if not cart_item:
+        messages.error(request, "Item not found in your cart.")
+        return redirect('cart_view')
+
+    cart_item.delete()
+    messages.success(request, "Item removed from cart!")
+    return redirect('cart_view')
+
+
+@login_required(login_url='login')
+def increase_quantity(request, cart_id):
+    cart_item = Cart.objects.filter(id=cart_id, user=request.user).first()
+    if cart_item:
+        cart_item.quantity += 1
+        cart_item.save()
+    return redirect('cart_view')
+
+
+@login_required(login_url='login')
+def decrease_quantity(request, cart_id):
+    cart_item = Cart.objects.filter(id=cart_id, user=request.user).first()
+    if cart_item:
+        if cart_item.quantity > 1:
+            cart_item.quantity -= 1
+            cart_item.save()
+        else:
+            cart_item.delete()  # Remove if quantity is 1 and user clicks decrease
+    return redirect('cart_view')

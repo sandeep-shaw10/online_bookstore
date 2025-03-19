@@ -1,0 +1,47 @@
+<main class="flex-1 p-6">
+    <div class="bg-white shadow-lg rounded-lg p-6">
+        <h2 class="text-2xl font-bold text-gray-800 mb-4">🛒 Your Cart</h2>
+
+        <!-- Cart Table -->
+        <div class="overflow-x-auto">
+            <table class="w-full border-collapse border border-gray-200">
+                <thead>
+                    <tr class="bg-gray-100 text-gray-800">
+                        <th class="p-3 text-left border border-gray-300">📚 Book</th>
+                        <th class="p-3 text-center border border-gray-300">🔢 Quantity</th>
+                        <th class="p-3 text-center border border-gray-300">💰 Price</th>
+                        <th class="p-3 text-center border border-gray-300">❌ Remove</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in cart_items %}
+                    <tr class="border border-gray-300">
+                        <td class="p-3 border border-gray-300">{{ item.book.name }}</td>
+                        <td class="p-3 text-center border border-gray-300 flex items-center justify-center">
+                            <form action="{% url 'decrease_quantity' item.id %}" method="POST">
+                                {% csrf_token %}
+                                <button type="submit" class="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600">➖</button>
+                            </form>
+                            <span class="mx-4 text-lg">{{ item.quantity }}</span>
+                            <form action="{% url 'increase_quantity' item.id %}" method="POST">
+                                {% csrf_token %}
+                                <button type="submit" class="px-2 py-1 bg-green-500 text-white rounded hover:bg-green-600">➕</button>
+                            </form>
+                        </td>
+                        <td class="p-3 text-center border border-gray-300">${{ item.book.price }}</td>
+                        <td class="p-3 text-center border border-gray-300">
+                            <form action="{% url 'remove_from_cart' item.id %}" method="POST">
+                                {% csrf_token %}
+                                <button type="submit" class="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700">🗑️ Remove</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Total Price -->
+        <p class="text-xl font-semibold text-gray-800 mt-6">💵 <strong>Total Price:</strong> ${{ total_price }}</p>
+    </div>
+</main>

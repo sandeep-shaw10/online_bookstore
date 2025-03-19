@@ -38,6 +38,12 @@ urlpatterns = [
     path("dashboard/shop/book/<int:book_id>/", book_detail, name="book_detail"),
     path("dashboard/profile/", profile, name="profile"),
     path("add-money/", add_money, name="add_money"),
+    path('dashboard/cart/', cart_view, name='cart_view'),
+    path('dashboard/cart/add/<int:book_id>/', add_to_cart, name='add_to_cart'),
+    path('dashboard/cart/remove/<int:cart_id>/', remove_from_cart, name='remove_from_cart'),
+    path('dashboard/cart/increase/<int:cart_id>/', increase_quantity, name='increase_quantity'),
+    path('dashboard/cart/decrease/<int:cart_id>/', decrease_quantity, name='decrease_quantity'),
+
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
