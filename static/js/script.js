@@ -1,80 +1,5 @@
 document.addEventListener('DOMContentLoaded', function() {
 
-    // Mock data
-    const featuredBooks = [
-      {
-        id: 1,
-        title: 'The Great Gatsby',
-        author: 'F. Scott Fitzgerald',
-        price: 12.99,
-        coverUrl: 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80',
-        rating: 4.5,
-      },
-      {
-        id: 2,
-        title: 'To Kill a Mockingbird',
-        author: 'Harper Lee',
-        price: 10.99,
-        coverUrl: 'https://images.unsplash.com/photo-1541963463532-d68292c34b19?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80',
-        rating: 4.8,
-      },
-      {
-        id: 3,
-        title: '1984',
-        author: 'George Orwell',
-        price: 9.99,
-        coverUrl: 'https://images.unsplash.com/photo-1543002588-bfa74002ed7e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80',
-        rating: 4.6,
-      },
-      {
-        id: 4,
-        title: 'Pride and Prejudice',
-        author: 'Jane Austen',
-        price: 8.99,
-        coverUrl: 'https://images.unsplash.com/photo-1512820790803-83ca734da794?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80',
-        rating: 4.7,
-      }
-    ];
-  
-    const newReleases = [
-      {
-        id: 5,
-        title: 'The Midnight Library',
-        author: 'Matt Haig',
-        price: 14.99,
-        coverUrl: 'https://images.unsplash.com/photo-1589998059171-988d887df646?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80',
-        rating: 4.4,
-      },
-      {
-        id: 6,
-        title: 'Project Hail Mary',
-        author: 'Andy Weir',
-        price: 15.99,
-        coverUrl: 'https://images.unsplash.com/photo-1531901599143-df5010ab9438?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80',
-        rating: 4.9,
-      },
-      {
-        id: 7,
-        title: 'Klara and the Sun',
-        author: 'Kazuo Ishiguro',
-        price: 13.99,
-        coverUrl: 'https://images.unsplash.com/photo-1589998059171-988d887df646?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80',
-        rating: 4.3,
-      },
-      {
-        id: 8,
-        title: 'The Four Winds',
-        author: 'Kristin Hannah',
-        price: 12.99,
-        coverUrl: 'https://images.unsplash.com/photo-1610882648335-ced8fc8fa6b6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=80',
-        rating: 4.5,
-      }
-    ];
-  
-
-    const categories = ['Fiction', 'Non-Fiction', 'Mystery', 'Sci-Fi', 'Romance', 'Biography', 'History', 'Self-Help', 'Children', 'Business', 'Cooking', 'Art'];
-  
-
     // DOM elements
     const mobileMenuBtn = document.getElementById('mobile-menu-btn');
     const mobileMenu = document.getElementById('mobile-menu');
@@ -82,7 +7,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const closeIcon = document.getElementById('close-icon');
     const featuredBooksContainer = document.getElementById('featured-books');
     const newReleasesContainer = document.getElementById('new-releases-books');
-    const categoriesGrid = document.getElementById('categories-grid');
 
 
     // Toggle mobile menu
@@ -140,5 +64,6 @@ document.addEventListener('DOMContentLoaded', function() {
   
     // Initialize
     populateContent();
+  
     
   });
