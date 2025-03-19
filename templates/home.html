@@ -135,19 +135,25 @@
         </p>
         
         <!-- Search Bar -->
-        <div class="mt-10 w-full max-w-xl">
-          <div class="relative">
-            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <i class="lucide-search h-5 w-5 text-gray-400"></i>
+        
+          <div class="mt-10 w-full max-w-xl"> 
+            <form method="GET" action="{% url 'home' %}">
+            <div class="relative">
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <i class="lucide-search h-5 w-5 text-gray-400"></i>
+              </div>
+              <input 
+                type="text"
+                name="q"
+                value="{{ query }}"
+                class="responsive-input block px-4 py-3 border border-gray-300 rounded-md leading-5 bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-300 ease-in-out" 
+                placeholder="Search for books, authors, or genres..."
+              >
+              <input type="hidden" name="search_by" value="name">
             </div>
-            <input 
-            type="text" 
-            class="responsive-input block px-4 py-3 border border-gray-300 rounded-md leading-5 bg-white text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-300 ease-in-out" 
-            placeholder="Search for books, authors, or genres..."
-          >
-          
+            </form>
           </div>
-        </div>
+        
         
         <!-- CTA Buttons -->
         <div class="flex flex-row mt-10 gap-4">
@@ -186,12 +192,57 @@
       </div>
     </div>
 
-    <!-- Featured Books Section -->
+    <!-- Featured Book List -->
     <section id="featured" class="py-12 bg-white">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 class="text-2xl font-extrabold text-gray-900 mb-6">Featured Books</h2>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6" id="featured-books">
-          <!-- Book cards will be inserted here by JavaScript -->
+        <h2 class="text-2xl font-extrabold text-gray-900 mb-6">Featured Release</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4" id="featured-grid">
+          {% for book in featured_books %}
+          <div class="bg-white rounded-lg shadow-md overflow-hidden transition-transform duration-300 hover:shadow-lg hover:-translate-y-1">
+            <!-- Book Cover -->
+            <div class="h-64 overflow-hidden">
+              <img 
+                src="{{ book.cover_image.url }}" 
+                alt="{{ book.name }}" 
+                class="w-full h-full object-cover"
+              />
+            </div>
+            
+            <!-- Book Info -->
+            <div class="p-4">
+              <h3 class="text-lg font-semibold text-gray-900 truncate">{{ book.name }}</h3>
+              <p class="text-sm text-gray-600 mb-2">
+                By {% for author in book.authors.all %} {{ author.name }}{% if not forloop.last %}, {% endif %}{% endfor %}
+              </p>
+              
+              <!-- Price and Rating -->
+              <div class="flex items-center mb-2">
+                <div class="flex items-center">
+                  <i class="lucide-star h-4 w-4 text-yellow-400">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-star">
+                      <path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"/>
+                    </svg>
+                  </i>
+                  <span class="ml-1 text-sm text-gray-700">
+                    {{ book.rating|default:"N/A" }}
+                  </span>
+                </div>
+                <span class="mx-2 text-gray-300">|</span>
+                <span class="text-sm text-gray-700 font-medium">
+                  ${{ book.price|floatformat:2 }}
+                </span>
+              </div>
+    
+              <!-- Add to Cart Button -->
+              <a href="{% url 'book_detail' book.id %}" class="w-full mt-2 flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700">
+                <i class="lucide-shopping-cart mr-2 h-4 w-4"></i>
+                View Details
+              </a>
+            </div>
+          </div>
+          {% empty %}
+          <p class="text-gray-600 col-span-full text-center">No books found.</p>
+          {% endfor %}
         </div>
       </div>
     </section>
@@ -201,7 +252,52 @@
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <h2 class="text-2xl font-extrabold text-gray-900 mb-6">New Releases</h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6" id="new-releases-books">
-          <!-- Book cards will be inserted here by JavaScript -->
+          {% for book in latest_books %}
+          <div class="bg-white rounded-lg shadow-md overflow-hidden transition-transform duration-300 hover:shadow-lg hover:-translate-y-1">
+            <!-- Book Cover -->
+            <div class="h-64 overflow-hidden">
+              <img 
+                src="{{ book.cover_image.url }}" 
+                alt="{{ book.name }}" 
+                class="w-full h-full object-cover"
+              />
+            </div>
+            
+            <!-- Book Info -->
+            <div class="p-4">
+              <h3 class="text-lg font-semibold text-gray-900 truncate">{{ book.name }}</h3>
+              <p class="text-sm text-gray-600 mb-2">
+                By {% for author in book.authors.all %} {{ author.name }}{% if not forloop.last %}, {% endif %}{% endfor %}
+              </p>
+              
+              <!-- Price and Rating -->
+              <div class="flex items-center mb-2">
+                <div class="flex items-center">
+                  <i class="lucide-star h-4 w-4 text-yellow-400">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-star">
+                      <path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"/>
+                    </svg>
+                  </i>
+                  <span class="ml-1 text-sm text-gray-700">
+                    {{ book.rating|default:"N/A" }}
+                  </span>
+                </div>
+                <span class="mx-2 text-gray-300">|</span>
+                <span class="text-sm text-gray-700 font-medium">
+                  ${{ book.price|floatformat:2 }}
+                </span>
+              </div>
+    
+              <!-- Add to Cart Button -->
+              <a href="{% url 'book_detail' book.id %}" class="w-full mt-2 flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700">
+                <i class="lucide-shopping-cart mr-2 h-4 w-4"></i>
+                View Details
+              </a>
+            </div>
+          </div>
+          {% empty %}
+          <p class="text-gray-600 col-span-full text-center">No books found.</p>
+          {% endfor %}
         </div>
       </div>
     </section>
@@ -213,7 +309,7 @@
         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4" id="categories-grid">
           {% for category in categories %}
           <div class="bg-gray-50 hover:bg-gray-100 rounded-lg p-4 text-center cursor-pointer transition duration-200">
-            <a href="#" class="font-medium text-gray-800">
+            <a href="{% url 'dashboard_shop' %}?q=&search_by=name&category={{ category.id }}" class="font-medium text-gray-800">
               {{ category.name }}
             </a>
           </div>
@@ -223,6 +319,7 @@
         </div>
       </div>
     </section>
+    
   </main>
 
   <!-- Footer -->

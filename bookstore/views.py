@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.db.models import Q
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
@@ -7,12 +8,28 @@ from django.contrib import messages
 from django.contrib.auth import update_session_auth_hash
 from customer.models import Customer
 from decimal import Decimal
+import random
+
 
 # Public Home Page
 def home(request):
+    query = request.GET.get("q", "").strip()
+    search_by = request.GET.get("search_by", "name")
+    selected_category = request.GET.get("category", "")
+
     categories = Category.objects.all()
+    featured_books = list(Book.objects.filter(featured=True))
+    random_featured_books = random.sample(featured_books, min(4, len(featured_books)))
+    latest_books = Book.objects.order_by('-id')[:4]
+
+    # If a search query is present, redirect to the shop page with parameters
+    if query or selected_category:
+        return redirect(f"/dashboard/shop?q={query}&search_by={search_by}&category={selected_category}")
+    
     return render(request, 'home.html', {
-        "categories": categories
+        "categories": categories,
+        "featured_books": random_featured_books,
+        "latest_books": latest_books
     })
 
 
