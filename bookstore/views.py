@@ -95,6 +95,10 @@ def dashboard_view(request):
 def dashboard_profile(request):
     return render(request, "dashboard/main.html", {"template_name": "dashboard/profile.html"})
 
+@login_required(login_url='epurse')
+def dashboard_epurse(request):
+    return render(request, "dashboard/main.html", {"template_name": "dashboard/epurse.html"})
+
 
 @login_required(login_url='login')
 def dashboard_shop(request):

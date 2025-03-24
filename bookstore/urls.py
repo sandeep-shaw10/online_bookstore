@@ -36,6 +36,7 @@ urlpatterns = [
     path('logout/', logout_view, name='logout'),
     path('dashboard/', dashboard_view, name='dashboard'),
     path('dashboard/profile', dashboard_profile, name='dashboard_profile'),
+    path('dashboard/epurse', dashboard_epurse, name='dashboard_epurse'),
     path('dashboard/shop', dashboard_shop, name='dashboard_shop'),
     path("dashboard/shop/book/<int:book_id>/", book_detail, name="book_detail"),
     path("dashboard/profile/", profile, name="profile"),
@@ -47,6 +48,8 @@ urlpatterns = [
     path('dashboard/cart/decrease/<int:cart_id>/', decrease_quantity, name='decrease_quantity'),
     path('checkout/<int:order_id>/', e_purse_checkout, name='e_purse_checkout'),
     path('order-success/', order_success, name='order_success'),
+    path('requisition/add/<int:book_id>/', add_to_requisition, name='add_to_requisition'),
+    path('requisition/list/', requisition_list, name='requisition_list'),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

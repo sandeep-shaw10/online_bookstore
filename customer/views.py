@@ -1,7 +1,9 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from .models import Order, OrderItem, Customer, Cart
+
+from store.models import Book
+from .models import Order, OrderItem, Customer, Cart, Requisition
 
 
 @login_required(login_url='login')
@@ -79,4 +81,40 @@ def e_purse_checkout(request, order_id):
 def order_success(request):
     return render(request, "dashboard/main.html", {
         "template_name": "dashboard/order_success.html"
+    })
+
+
+@login_required(login_url='login')
+def add_to_requisition(request, book_id):
+    """Handles adding a book to the requisition table"""
+    customer = request.user.customer  # Get logged-in customer
+    book = get_object_or_404(Book, id=book_id)
+
+    # Check if requisition already exists
+    existing_requisition = Requisition.objects.filter(customer=customer, book=book).first()
+    if existing_requisition:
+        messages.warning(request, "⚠️ You have already requested this book.")
+        return redirect("book_detail", book_id=book.id)
+
+    # Create a new requisition
+    requisition = Requisition.objects.create(
+        customer=customer,
+        book=book,
+        book_name=book.name,
+        author_names=", ".join([author.name for author in book.authors.all()])
+    )
+
+    messages.success(request, "✅ Book has been added to your requisition list.")
+    return redirect("requisition_list")  # Redirect to the user's requisition list
+
+
+@login_required(login_url='login')
+def requisition_list(request):
+    """Displays the list of requisitioned books for the logged-in user"""
+    customer = request.user.customer  # Get logged-in customer
+    requisitions = Requisition.objects.filter(customer=customer).order_by("-requested_at")
+
+    return render(request, "dashboard/main.html", {
+        "template_name": "dashboard/requisition_list.html",
+        "requisitions": requisitions
     })

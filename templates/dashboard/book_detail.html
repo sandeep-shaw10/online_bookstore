@@ -37,8 +37,8 @@
                 <p class="text-gray-600 mt-2"><strong>Publisher:</strong> {{ book.publisher|default:"N/A" }}</p>
                 <p class="text-gray-600 mt-2"><strong>Year:</strong> {{ book.publication_year|default:"N/A" }}</p>
                 <p class="text-gray-800 font-semibold text-xl mt-4">$ {{ book.price }}</p>
-
-                <!-- Add to Cart Button -->
+                
+                <!-- Add to Cart or Requisition Button -->
                 <div class="mt-4">
                     {% if book.stock > 0 %}
                         <a href="{% url 'add_to_cart' book.id %}" 
@@ -46,11 +46,13 @@
                         🛒 Add to Cart
                         </a>
                     {% else %}
-                        <span class="px-6 py-3 bg-red-400 text-white font-semibold rounded-md cursor-not-allowed">
-                            🚫 Out of Stock
-                        </span>
+                        <a href="{% url 'add_to_requisition' book.id %}" 
+                        class="px-6 py-3 bg-blue-500 text-white font-semibold rounded-md hover:bg-blue-600 transition duration-300 ease-in-out">
+                        📥 Add to Requisition
+                        </a>
                     {% endif %}
                 </div>
+
 
             </div>
         </div>

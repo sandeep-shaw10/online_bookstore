@@ -1,0 +1,17 @@
+<main class="flex-1 p-6">
+    <div class="bg-white shadow-md rounded-lg p-6">
+        <!-- E-Purse Section -->
+        <div>
+            <h3 class="text-xl font-semibold text-gray-800">💰 E-Purse Balance: ${{ user.customer.e_purse_balance }}</h3>
+
+            <!-- Add Money Form -->
+            <form method="POST" action="{% url 'add_money' %}" class="mt-4 flex space-x-2">
+                {% csrf_token %}
+                <input type="number" name="amount" step="0.01" min="1" class="px-4 py-2 border rounded-md" placeholder="Enter amount">
+                <button type="submit" class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600">
+                    ➕ Add Money
+                </button>
+            </form>
+        </div>
+    </div>
+</main>

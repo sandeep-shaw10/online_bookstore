@@ -44,7 +44,7 @@
                 </li>
                 <li>
                     <a href="{% url 'dashboard_profile' %}" class="block px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600">
-                        👤 View Profile 
+                        👤 Profile 
                     </a>
                 </li>
                 <li>
@@ -53,10 +53,16 @@
                     </a>
                 </li>
                 <li>
-                    <button class="w-full text-left px-4 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600">
-                        🔔 Notifications 
-                    </button>
+                    <a href="{% url 'requisition_list' %}" class="block px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
+                        📋 Requisitions
+                    </a>
+                </li>   
+                <li>
+                    <a href="{% url 'dashboard_epurse' %}" class="block px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400">
+                        💲 E-Purse
+                    </a>
                 </li>
+                              
 
             </ul>
         </aside>
