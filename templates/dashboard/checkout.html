@@ -1,0 +1,51 @@
+<main class="flex-1 p-6">
+    <div class="bg-white shadow-lg rounded-lg p-6">
+
+        <!-- Back Button -->
+        <a href="{% url 'dashboard_shop' %}" class="mb-4 inline-flex items-center px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition duration-300">
+            ⬅️ Back to Shop
+        </a>
+
+        <h2 class="text-2xl font-bold text-gray-800 mb-4">🛒 E-Purse Checkout</h2>
+
+        <!-- Order Details -->
+        <p class="text-lg">Order Total: <strong>${{ order.total_price }}</strong></p>
+        <p class="text-lg">E-Purse Balance: <strong>${{ customer.e_purse_balance }}</strong></p>
+
+        <!-- Display Messages -->
+        {% if messages %}
+            {% for message in messages %}
+                <p class="mt-2 text-red-500">{{ message }}</p>
+            {% endfor %}
+        {% endif %}
+
+        <!-- Shipping Address Form -->
+        <form method="POST">
+            {% csrf_token %}
+
+            <label class="block text-gray-700 mt-4">📍 Address:</label>
+            <textarea name="address" required class="w-full px-4 py-2 border rounded-md" placeholder="Enter your full address"></textarea>
+
+            <label class="block text-gray-700 mt-4">🏙️ State:</label>
+            <input type="text" name="state" required class="w-full px-4 py-2 border rounded-md" placeholder="Enter your state">
+
+            <label class="block text-gray-700 mt-4">📮 Pincode:</label>
+            <input type="text" name="pincode" required class="w-full px-4 py-2 border rounded-md" placeholder="Enter your pincode">
+
+            <label class="block text-gray-700 mt-4">🌍 Country:</label>
+            <input type="text" name="country" required class="w-full px-4 py-2 border rounded-md" placeholder="Enter your country">
+
+            {% if customer.e_purse_balance >= order.total_price %}
+                <button type="submit" class="mt-4 px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600">
+                    ✅ Confirm Payment
+                </button>
+            {% else %}
+                <p class="text-red-500 mt-4">⚠️ Insufficient balance! Please add funds to E-Purse.</p>
+            {% endif %}
+        </form>
+
+        <a href="{% url 'cart_view' %}" class="mt-4 inline-block text-blue-500 hover:underline">
+            ⬅️ Back to Cart
+        </a>
+    </div>
+</main>

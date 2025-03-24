@@ -24,24 +24,26 @@ class Review(models.Model):
     def __str__(self):
         return f'{self.customer.user.username} - {self.book.name} ({self.rating}/5)'
 
-# ✅ Order Table (Groups all Order Items)
+
 class Order(models.Model):
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
-    total_price = models.DecimalField(max_digits=10, decimal_places=2)  # Total Order Price
-    address = models.TextField()  # Delivery Address
+    total_price = models.DecimalField(max_digits=10, decimal_places=2)
+    address = models.TextField()  # Stores full shipping address
     payment_mode = models.CharField(
         max_length=50, 
-        choices=[('COD', 'Cash on Delivery'), ('Online', 'Online Payment')]
-    )  # Payment Mode
+        choices=[('E-Purse', 'E-Purse'), ('COD', 'Cash on Delivery')]
+    )
     status = models.CharField(
         max_length=20, 
-        choices=[('Pending', 'Pending'), ('Shipped', 'Shipped'), ('Delivered', 'Delivered')],
+        choices=[('Pending', 'Pending'), ('Paid', 'Paid'), ('Failed', 'Failed')],
         default='Pending'
-    )  # Order Status
-    timestamp = models.DateTimeField(auto_now_add=True)  # Order Time
+    )
+    timestamp = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f'Order #{self.id} by {self.customer.user.username} - {self.status}'
+
+
 
 # ✅ Order Item Table (Individual Items in an Order)
 class OrderItem(models.Model):

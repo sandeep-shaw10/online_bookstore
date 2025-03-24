@@ -6,7 +6,7 @@ from django.contrib.auth.models import User
 from store.models import Book, Writer, Category
 from django.contrib import messages
 from django.contrib.auth import update_session_auth_hash
-from customer.models import Cart
+from customer.models import Cart, Order, Customer
 from decimal import Decimal
 import random
 
@@ -205,11 +205,23 @@ def add_to_cart(request, book_id):
 def cart_view(request):
     cart_items = Cart.objects.filter(user=request.user)
     total_price = sum(item.book.price * item.quantity for item in cart_items)
-    
+
+    # Get the Customer instance
+    customer, created = Customer.objects.get_or_create(user=request.user)
+
+    # Create or get an existing pending order
+    order, created = Order.objects.get_or_create(customer=customer, status="Pending", defaults={"total_price": total_price, "payment_mode": "E-Purse", "address": "User Address"})
+
+    # Update order total price if it changed
+    if not created:
+        order.total_price = total_price
+        order.save()
+
     return render(request, "dashboard/main.html", {
         "template_name": "dashboard/cart.html",
         "cart_items": cart_items,
-        "total_price": total_price
+        "total_price": total_price,
+        "order": order  # ✅ Pass the order object to the template
     })
 
 

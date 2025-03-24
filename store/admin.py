@@ -20,7 +20,7 @@ class WriterAdmin(admin.ModelAdmin):
 class BookAdmin(admin.ModelAdmin):
     list_display = ('name', 'display_authors', 'cover_image_tag', 'price', 'stock')  # Added authors
     readonly_fields = ('cover_image_tag',)
-    list_filter = ('categories', 'authors')  # Filter books by category and authors
+    list_filter = ('categories', 'authors','featured')  # Filter books by category and authors
     search_fields = ('name', 'authors__name')  # Search by book name or author name
     ordering = ('name', 'price', 'stock')  # Default sorting by name, then price, then stock
 

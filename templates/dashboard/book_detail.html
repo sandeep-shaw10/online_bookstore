@@ -40,11 +40,18 @@
 
                 <!-- Add to Cart Button -->
                 <div class="mt-4">
-                    <a href="{% url 'add_to_cart' book.id %}" 
-                       class="px-6 py-3 bg-green-500 text-white font-semibold rounded-md hover:bg-green-600 transition duration-300 ease-in-out">
-                       🛒 Add to Cart
-                    </a>
+                    {% if book.stock > 0 %}
+                        <a href="{% url 'add_to_cart' book.id %}" 
+                        class="px-6 py-3 bg-green-500 text-white font-semibold rounded-md hover:bg-green-600 transition duration-300 ease-in-out">
+                        🛒 Add to Cart
+                        </a>
+                    {% else %}
+                        <span class="px-6 py-3 bg-red-400 text-white font-semibold rounded-md cursor-not-allowed">
+                            🚫 Out of Stock
+                        </span>
+                    {% endif %}
                 </div>
+
             </div>
         </div>
 
