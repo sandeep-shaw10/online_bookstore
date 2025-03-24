@@ -18,6 +18,7 @@ class Review(models.Model):
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
     book = models.ForeignKey(Book, on_delete=models.CASCADE)
     timestamp = models.DateTimeField(auto_now_add=True)
+    edited = models.BooleanField(default=False)  # ✅ New field to track edits
     rating = models.DecimalField(max_digits=3, decimal_places=1)  # Rating out of 5 (1.0 to 5.0)
     description = models.TextField(null=True, blank=True)  # Optional review text
 

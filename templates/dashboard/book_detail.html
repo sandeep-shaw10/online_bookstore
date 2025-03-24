@@ -37,30 +37,129 @@
                 <p class="text-gray-600 mt-2"><strong>Publisher:</strong> {{ book.publisher|default:"N/A" }}</p>
                 <p class="text-gray-600 mt-2"><strong>Year:</strong> {{ book.publication_year|default:"N/A" }}</p>
                 <p class="text-gray-800 font-semibold text-xl mt-4">$ {{ book.price }}</p>
-                
+
                 <!-- Add to Cart or Requisition Button -->
                 <div class="mt-4">
                     {% if book.stock > 0 %}
                         <a href="{% url 'add_to_cart' book.id %}" 
-                        class="px-6 py-3 bg-green-500 text-white font-semibold rounded-md hover:bg-green-600 transition duration-300 ease-in-out">
-                        🛒 Add to Cart
+                           class="px-6 py-3 bg-green-500 text-white font-semibold rounded-md hover:bg-green-600 transition duration-300 ease-in-out">
+                           🛒 Add to Cart
                         </a>
                     {% else %}
                         <a href="{% url 'add_to_requisition' book.id %}" 
-                        class="px-6 py-3 bg-blue-500 text-white font-semibold rounded-md hover:bg-blue-600 transition duration-300 ease-in-out">
-                        📥 Add to Requisition
+                           class="px-6 py-3 bg-blue-500 text-white font-semibold rounded-md hover:bg-blue-600 transition duration-300 ease-in-out">
+                           📥 Add to Requisition
                         </a>
                     {% endif %}
                 </div>
-
-
             </div>
         </div>
 
-        <!-- Summary -->
+        <!-- Book Summary -->
         <div class="mt-6 text-center md:text-left">
             <h3 class="text-lg md:text-xl font-semibold">📖 Book Summary</h3>
             <p class="text-gray-600 mt-2">{{ book.summary }}</p>
         </div>
+
+        <hr class="my-4">
+
+        <!-- ⭐ Review Section -->
+        <div class="mt-8">
+            <h3 class="text-lg md:text-xl font-semibold">📢 Leave a Review</h3>
+
+            {% if user_review %}
+                <!-- ✅ Review Exists - Show Read-Only View -->
+                <div class="p-4 border rounded-md shadow-sm bg-gray-100">
+                    <p class="text-sm text-gray-600"><strong>{{ user_review.customer.user.username }}</strong> - {{ user_review.timestamp|date:"F d, Y" }}</p>
+                    <p class="text-yellow-500 text-lg">⭐ {{ user_review.rating }}/5</p>
+                    <p class="text-gray-700">{{ user_review.description|default:"No review text" }}</p>
+
+                    {% if user_review.edited %}
+                        <p class="text-xs text-gray-500 mt-1">✏️ Edited on: {{ user_review.timestamp|date:"F d, Y H:i" }}</p>
+                    {% endif %}
+
+                    <!-- Edit & Delete Buttons -->
+                    <div class="mt-2 flex space-x-4">
+                        <button id="editReviewBtn" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
+                            ✏️ Update Review
+                        </button>
+                        <a href="{% url 'delete_review' user_review.id %}" 
+                        class="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
+                        onclick="return confirm('Are you sure you want to delete this review?');">
+                        ❌ Delete
+                        </a>
+                    </div>
+                </div>
+
+                <!-- ✅ Hidden Form for Editing (Initially Disabled) -->
+                <form method="POST" action="{% url 'submit_review' book.id %}" class="mt-4 hidden" id="editReviewForm">
+                    {% csrf_token %}
+                    <label class="block text-gray-700">Your Rating (1-5 Stars):</label>
+                    <select name="rating" required class="w-full px-4 py-2 border rounded-md mt-2">
+                        <option value="5" {% if user_review.rating == 5 %}selected{% endif %}>⭐⭐⭐⭐⭐ (5 Stars)</option>
+                        <option value="4" {% if user_review.rating == 4 %}selected{% endif %}>⭐⭐⭐⭐ (4 Stars)</option>
+                        <option value="3" {% if user_review.rating == 3 %}selected{% endif %}>⭐⭐⭐ (3 Stars)</option>
+                        <option value="2" {% if user_review.rating == 2 %}selected{% endif %}>⭐⭐ (2 Stars)</option>
+                        <option value="1" {% if user_review.rating == 1 %}selected{% endif %}>⭐ (1 Star)</option>
+                    </select>
+
+                    <label class="block text-gray-700 mt-4">Your Review:</label>
+                    <textarea name="description" class="w-full px-4 py-2 border rounded-md mt-2">{{ user_review.description }}</textarea>
+
+                    <button type="submit" class="mt-4 px-6 py-3 bg-yellow-500 text-white font-semibold rounded-md hover:bg-yellow-600 transition duration-300 ease-in-out">
+                        💾 Update Review
+                    </button>
+                </form>
+            {% else %}
+                <!-- ✅ No Review Yet - Show Empty Form -->
+                <form method="POST" action="{% url 'submit_review' book.id %}" class="mt-4">
+                    {% csrf_token %}
+                    <label class="block text-gray-700">Your Rating (1-5 Stars):</label>
+                    <select name="rating" required class="w-full px-4 py-2 border rounded-md mt-2">
+                        <option value="5">⭐⭐⭐⭐⭐ (5 Stars)</option>
+                        <option value="4">⭐⭐⭐⭐ (4 Stars)</option>
+                        <option value="3">⭐⭐⭐ (3 Stars)</option>
+                        <option value="2">⭐⭐ (2 Stars)</option>
+                        <option value="1">⭐ (1 Star)</option>
+                    </select>
+
+                    <label class="block text-gray-700 mt-4">Your Review:</label>
+                    <textarea name="description" class="w-full px-4 py-2 border rounded-md mt-2" placeholder="Write your thoughts..."></textarea>
+
+                    <button type="submit" class="mt-4 px-6 py-3 bg-yellow-500 text-white font-semibold rounded-md hover:bg-yellow-600 transition duration-300 ease-in-out">
+                        📝 Submit Review
+                    </button>
+                </form>
+            {% endif %}
+        </div>
+
+        <!-- JavaScript to Toggle Edit Form -->
+        <script>
+            document.getElementById("editReviewBtn")?.addEventListener("click", function() {
+                document.getElementById("editReviewForm").classList.toggle("hidden");
+            });
+        </script>
+
+        <hr class="my-4">
+
+        <!-- Display Reviews -->
+        <div class="mt-8 mb-4">
+            <h3 class="text-lg md:text-xl font-semibold">📢 Customer Reviews</h3>
+
+            {% if reviews.exists %}
+                <div class="mt-4 space-y-4">
+                    {% for review in reviews %}
+                        <div class="p-4 border rounded-md shadow-sm bg-gray-100">
+                            <p class="text-sm text-gray-600"><strong>{{ review.customer.user.username }}</strong> - {{ review.timestamp|date:"F d, Y" }}</p>
+                            <p class="text-yellow-500 text-lg">⭐ {{ review.rating }}/5</p>
+                            <p class="text-gray-700">{{ review.description|default:"No review text" }}</p>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-gray-600 mt-4">⚠️ No reviews yet. Be the first to review this book!</p>
+            {% endif %}
+        </div>
+
     </div>
 </main>

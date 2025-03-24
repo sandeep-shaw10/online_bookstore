@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 
 from store.models import Book
-from .models import Order, OrderItem, Customer, Cart, Requisition
+from .models import Order, OrderItem, Customer, Cart, Requisition, Review
 
 
 @login_required(login_url='login')
@@ -118,3 +118,40 @@ def requisition_list(request):
         "template_name": "dashboard/requisition_list.html",
         "requisitions": requisitions
     })
+
+
+@login_required(login_url='login')
+def submit_review(request, book_id):
+    """Handles review submission and editing"""
+    customer = request.user.customer
+    book = get_object_or_404(Book, id=book_id)
+
+    if request.method == "POST":
+        rating = request.POST.get("rating")
+        description = request.POST.get("description", "").strip()
+
+        # Check if review already exists (Update instead of creating a new one)
+        review, created = Review.objects.get_or_create(customer=customer, book=book)
+
+        review.rating = rating
+        review.description = description
+
+        # Mark as edited if it's an update
+        if not created:
+            review.edited = True
+
+        review.save()
+
+        messages.success(request, "✅ Your review has been updated!" if not created else "✅ Your review has been submitted!")
+        return redirect("book_detail", book_id=book.id)
+
+
+@login_required(login_url='login')
+def delete_review(request, review_id):
+    """Allow users to delete their own review"""
+    review = get_object_or_404(Review, id=review_id, customer=request.user.customer)
+    book_id = review.book.id
+    review.delete()
+
+    messages.success(request, "❌ Your review has been deleted.")
+    return redirect("book_detail", book_id=book_id)

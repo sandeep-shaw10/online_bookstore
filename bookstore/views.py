@@ -6,7 +6,7 @@ from django.contrib.auth.models import User
 from store.models import Book, Writer, Category
 from django.contrib import messages
 from django.contrib.auth import update_session_auth_hash
-from customer.models import Cart, Order, Customer
+from customer.models import Cart, Order, Customer, Review
 from decimal import Decimal
 import random
 
@@ -134,11 +134,19 @@ def dashboard_shop(request):
 def book_detail(request, book_id):
     book = get_object_or_404(Book, id=book_id)
     cart_items = Cart.objects.filter(user=request.user).values_list('book_id', flat=True)
+    reviews = Review.objects.filter(book=book).order_by("-timestamp")
+
+    # ✅ Fetch the logged-in user's review, if it exists
+    user_review = Review.objects.filter(book=book, customer=request.user.customer).first()
+
     return render(request, "dashboard/main.html", {
         "template_name": "dashboard/book_detail.html", 
         "book": book,
-        'cart_items': cart_items
+        "cart_items": cart_items,
+        "reviews": reviews,
+        "user_review": user_review  # ✅ Pass user's review to the template
     })
+
 # Authentication -----------------
 
 
