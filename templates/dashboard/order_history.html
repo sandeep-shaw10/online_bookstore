@@ -1,0 +1,35 @@
+<main class="flex-1 p-6">
+    <div class="bg-white shadow-lg rounded-lg p-6">
+        <h2 class="text-2xl font-bold text-gray-800 mb-4">📜 Order History</h2>
+
+        {% if orders %}
+            <div class="space-y-6">
+                {% for order in orders %}
+                    <div class="p-4 border rounded-md shadow-md bg-gray-100">
+                        <p class="text-sm text-gray-600">📅 Ordered on: <strong>{{ order.timestamp|date:"F d, Y H:i" }}</strong></p>
+                        <p class="text-sm text-gray-600">💰 Total Price: <strong>${{ order.total_price }}</strong></p>
+                        <p class="text-sm text-gray-600">🛒 Status: <strong class="{% if order.status == 'Pending' %}text-yellow-500{% elif order.status == 'Delivered' %}text-green-500{% else %}text-blue-500{% endif %}">
+                            {{ order.status }}</strong></p>
+                        <p class="text-sm text-gray-600">💳 Payment Mode: <strong>{{ order.payment_mode }}</strong></p>
+
+                        <!-- Order Items -->
+                        <div class="mt-4">
+                            <h3 class="text-md font-semibold text-gray-800">📚 Ordered Books:</h3>
+                            <ul class="mt-2">
+                                {% for item in order.items.all %}
+                                    <li class="text-gray-700">🔹 {{ item.book.name }} (x{{ item.quantity }}) - ${{ item.price }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="text-gray-600 mt-4">⚠️ You haven't placed any orders yet.</p>
+        {% endif %}
+
+        <a href="{% url 'dashboard_shop' %}" class="mt-4 inline-block text-blue-500 hover:underline">
+            ⬅️ Back to Shop
+        </a>
+    </div>
+</main>

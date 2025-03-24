@@ -50,11 +50,15 @@
         <!-- Total Price -->
         <p class="text-xl font-semibold text-gray-800 mt-6">💵 <strong>Total Price:</strong> ${{ total_price }}</p>
 
-        <form action="{% url 'e_purse_checkout' order.id %}" method="GET">
-            <button type="submit" class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600">
-                💳 Proceed to Checkout
-            </button>
-        </form>
+        {% if cart_items %}
+            <form action="{% url 'e_purse_checkout' order.id %}" method="GET">
+                <button type="submit" class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600">
+                    💳 Proceed to Checkout
+                </button>
+            </form>
+        {% else %}
+            <p class="text-red-500 mt-4">⚠️ Your cart is empty. Add items before proceeding to checkout.</p>
+        {% endif %}
         
     </div>
 </main>

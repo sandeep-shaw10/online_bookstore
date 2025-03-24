@@ -96,12 +96,13 @@
                     {% csrf_token %}
                     <label class="block text-gray-700">Your Rating (1-5 Stars):</label>
                     <select name="rating" required class="w-full px-4 py-2 border rounded-md mt-2">
-                        <option value="5" {% if user_review.rating == 5 %}selected{% endif %}>⭐⭐⭐⭐⭐ (5 Stars)</option>
-                        <option value="4" {% if user_review.rating == 4 %}selected{% endif %}>⭐⭐⭐⭐ (4 Stars)</option>
-                        <option value="3" {% if user_review.rating == 3 %}selected{% endif %}>⭐⭐⭐ (3 Stars)</option>
-                        <option value="2" {% if user_review.rating == 2 %}selected{% endif %}>⭐⭐ (2 Stars)</option>
-                        <option value="1" {% if user_review.rating == 1 %}selected{% endif %}>⭐ (1 Star)</option>
+                        <option value="5" {% if user_review and user_review.rating == 5 %}selected{% endif %}>⭐⭐⭐⭐⭐ (5 Stars)</option>
+                        <option value="4" {% if user_review and user_review.rating == 4 %}selected{% endif %}>⭐⭐⭐⭐ (4 Stars)</option>
+                        <option value="3" {% if user_review and user_review.rating == 3 %}selected{% endif %}>⭐⭐⭐ (3 Stars)</option>
+                        <option value="2" {% if user_review and user_review.rating == 2 %}selected{% endif %}>⭐⭐ (2 Stars)</option>
+                        <option value="1" {% if user_review and user_review.rating == 1 %}selected{% endif %}>⭐ (1 Star)</option>
                     </select>
+                    
 
                     <label class="block text-gray-700 mt-4">Your Review:</label>
                     <textarea name="description" class="w-full px-4 py-2 border rounded-md mt-2">{{ user_review.description }}</textarea>
@@ -150,7 +151,11 @@
                 <div class="mt-4 space-y-4">
                     {% for review in reviews %}
                         <div class="p-4 border rounded-md shadow-sm bg-gray-100">
-                            <p class="text-sm text-gray-600"><strong>{{ review.customer.user.username }}</strong> - {{ review.timestamp|date:"F d, Y" }}</p>
+                            <p class="text-sm text-gray-600">
+                                <strong>{{ review.customer.user.username }}</strong> 
+                                {% if review.edited %} <span class="text-xs text-gray-500">(Edited)</span> {% endif %}
+                                - {{ review.timestamp|date:"F d, Y" }}
+                            </p>
                             <p class="text-yellow-500 text-lg">⭐ {{ review.rating }}/5</p>
                             <p class="text-gray-700">{{ review.description|default:"No review text" }}</p>
                         </div>
@@ -160,6 +165,7 @@
                 <p class="text-gray-600 mt-4">⚠️ No reviews yet. Be the first to review this book!</p>
             {% endif %}
         </div>
+
 
     </div>
 </main>

@@ -130,20 +130,37 @@ def submit_review(request, book_id):
         rating = request.POST.get("rating")
         description = request.POST.get("description", "").strip()
 
-        # Check if review already exists (Update instead of creating a new one)
-        review, created = Review.objects.get_or_create(customer=customer, book=book)
+        # ✅ Ensure rating is provided
+        if not rating:
+            messages.error(request, "⚠️ Please select a rating before submitting your review.")
+            return redirect("book_detail", book_id=book.id)
 
-        review.rating = rating
-        review.description = description
+        # ✅ Convert rating to Decimal type safely
+        try:
+            rating = float(rating)
+        except (ValueError, TypeError):
+            messages.error(request, "⚠️ Invalid rating value. Please choose a valid rating.")
+            return redirect("book_detail", book_id=book.id)
 
-        # Mark as edited if it's an update
-        if not created:
-            review.edited = True
+        # ✅ Ensure rating is within 1-5 range
+        if rating < 1 or rating > 5:
+            messages.error(request, "⚠️ Rating must be between 1 and 5 stars.")
+            return redirect("book_detail", book_id=book.id)
 
-        review.save()
+        # ✅ Delete any existing review to avoid duplicate issues
+        Review.objects.filter(customer=customer, book=book).delete()
 
-        messages.success(request, "✅ Your review has been updated!" if not created else "✅ Your review has been submitted!")
+        # ✅ Create a new review with proper validation
+        review = Review.objects.create(
+            customer=customer,
+            book=book,
+            rating=rating,  # ✅ Ensures rating is set properly
+            description=description
+        )
+
+        messages.success(request, "✅ Your review has been submitted!")
         return redirect("book_detail", book_id=book.id)
+
 
 
 @login_required(login_url='login')
@@ -155,3 +172,15 @@ def delete_review(request, review_id):
 
     messages.success(request, "❌ Your review has been deleted.")
     return redirect("book_detail", book_id=book_id)
+
+
+@login_required(login_url='login')
+def order_history(request):
+    """Fetch and display the user's order history"""
+    customer = request.user.customer  # Get logged-in customer
+    orders = Order.objects.filter(customer=customer).order_by("-timestamp")  # Get orders (newest first)
+
+    return render(request, "dashboard/main.html", {
+        "template_name": "dashboard/order_history.html",
+        "orders": orders
+    })
