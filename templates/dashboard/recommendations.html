@@ -68,7 +68,7 @@
         setInterval(() => {
             document.getElementById("recommendation-type").innerText = recommendationTypes[index];
             index = (index + 1) % recommendationTypes.length;
-        }, 500);
+        }, 1250);
 
         // ✅ Randomize delay between 2 and 10 seconds
         const randomDelay = Math.floor(Math.random() * (10000 - 2000 + 1)) + 2000;  // Random time between 2000ms (2s) and 10000ms (10s)
@@ -76,7 +76,7 @@
         setTimeout(() => {
             document.getElementById("loader").style.display = "none";  // Hide loader
             document.getElementById("content").classList.remove("hidden"); // Show content
-        }, 2500);
+        }, 5000);
 
         });
 

@@ -9,7 +9,7 @@ from django.db.models import Count  # ✅ Add this import
 from mlxtend.frequent_patterns import apriori, association_rules
 import pandas as pd
 from collections import Counter
-import random
+from django.db.models import Count, Avg  # ✅ Import Avg
 
 
 @login_required(login_url='login')
@@ -194,7 +194,7 @@ def order_history(request):
 
 @login_required(login_url='login')
 def recommended_books(request):
-    """Generate book recommendations based on user history & ML models"""
+    """Generate book recommendations using ML & traditional filtering"""
     customer = request.user.customer  # Get logged-in customer
 
     # ✅ Step 1: Get Ordered & Requisitioned Books
@@ -214,13 +214,19 @@ def recommended_books(request):
         top_categories = [c[0] for c in Counter(categories).most_common(3)]
         top_authors = [a[0] for a in Counter(authors).most_common(3)]
 
-        # Recommend books based on category & author (excluding already purchased/requested books)
+        # ✅ Recommend books based on category (fallback to random if empty)
         category_books = Book.objects.filter(categories__in=top_categories, stock__gt=0).exclude(id__in=book_ids).distinct()
+        if not category_books.exists():
+            category_books = Book.objects.filter(stock__gt=0).order_by("?")[:4]  # ✅ Return random books if empty
+
+        # ✅ Recommend books based on author (fallback to random if empty)
         author_books = Book.objects.filter(authors__in=top_authors, stock__gt=0).exclude(id__in=book_ids).distinct()
+        if not author_books.exists():
+            author_books = Book.objects.filter(stock__gt=0).order_by("?")[:4]  # ✅ Return random books if empty
     else:
-        # ✅ Step 3: If No Order/Requisition, Suggest Random Books Based on Category & Author
-        category_books = Book.objects.filter(categories__in=Category.objects.all(), stock__gt=0).order_by("?")[:4]
-        author_books = Book.objects.filter(authors__in=Writer.objects.all(), stock__gt=0).order_by("?")[:4]
+        # ✅ If No Order/Requisition, Suggest Random Books Based on Category & Author
+        category_books = Book.objects.filter(stock__gt=0).order_by("?")[:4]
+        author_books = Book.objects.filter(stock__gt=0).order_by("?")[:4]
 
     # ✅ Step 4: Suggest 4 Most Popular Books
     popular_books = Book.objects.filter(stock__gt=0).annotate(total_sales=Count('orderitem')).order_by('-total_sales')[:4]
@@ -238,26 +244,45 @@ def recommended_books(request):
 
     ml_recommended_books = []
     if transactions:
-        df = pd.DataFrame(transactions).fillna(0)
-        book_dummy = pd.get_dummies(df.stack()).groupby(level=0).sum()
+        try:
+            # ✅ Convert to DataFrame
+            df = pd.DataFrame(transactions).fillna(0)
 
-        frequent_itemsets = apriori(book_dummy, min_support=0.1, use_colnames=True)
-        rules = association_rules(frequent_itemsets, metric="lift", min_threshold=1.2)
+            # ✅ Convert to Binary Format (0 or 1)
+            book_dummy = pd.get_dummies(df.stack()).groupby(level=0).sum()
+            book_dummy = book_dummy.applymap(lambda x: 1 if x > 0 else 0)  # ✅ Convert to 1 (bought) or 0 (not bought)
 
-        if not rules.empty:
-            book_ids = set()
-            for itemset in rules.sort_values('lift', ascending=False).head(5)['consequents']:
-                book_ids.update(itemset)
+            # ✅ Apply Apriori Algorithm
+            frequent_itemsets = apriori(book_dummy, min_support=0.1, use_colnames=True)
+            rules = association_rules(frequent_itemsets, metric="lift", min_threshold=1.2)
 
-            ml_recommended_books = Book.objects.filter(id__in=book_ids, stock__gt=0)  # ✅ Exclude out-of-stock books
+            # ✅ Get Strongly Associated Books
+            if not rules.empty:
+                book_ids = set()
+                for itemset in rules.sort_values('lift', ascending=False).head(5)['consequents']:
+                    book_ids.update(itemset)
+
+                ml_recommended_books = Book.objects.filter(id__in=book_ids, stock__gt=0)  # ✅ Exclude out-of-stock books
+
+        except Exception as e:
+            print(f"ML Recommendation Error: {e}")  # ✅ Log error (avoid breaking system)
 
     # ✅ Combine All Recommendations (Ensuring Uniqueness)
     recommended_books = list(set(popular_books) | set(category_books) | set(author_books) | set(ml_recommended_books))
+
+    # ✅ Ensure at least 4 books are recommended (fallback to random if needed)
+    if len(recommended_books) < 4:
+        extra_books = Book.objects.filter(stock__gt=0).order_by("?")[: (4 - len(recommended_books))]
+        recommended_books.extend(extra_books)
+
+    # ✅ Calculate Average Ratings for Each Recommended Book
+    recommended_books = Book.objects.filter(id__in=[book.id for book in recommended_books]).annotate(avg_rating=Avg('review__rating'))
 
     return render(request, "dashboard/main.html", {
         "template_name": "dashboard/recommendations.html",
         "recommended_books": recommended_books,
         "popular_books": popular_books,
         "category_books": category_books,
-        "author_books": author_books
+        "author_books": author_books,
+        "range": range(1, 6)  # ✅ Pass range from 1 to 5
     })

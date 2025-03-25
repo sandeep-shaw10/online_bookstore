@@ -54,6 +54,7 @@ urlpatterns = [
     path('review/delete/<int:review_id>/', delete_review, name='delete_review'),
     path('order/history/', order_history, name='order_history'),
     path('recommendations/', recommended_books, name='recommendations'),
+    path('analytics/', analytics, name='analytics'),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

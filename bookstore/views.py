@@ -1,14 +1,19 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.db.models import Q
+from django.db.models import Q, Avg, Sum, Count
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from store.models import Book, Writer, Category
 from django.contrib import messages
 from django.contrib.auth import update_session_auth_hash
-from customer.models import Cart, Order, Customer, Review
+from customer.models import Cart, Order, Customer, OrderItem, Requisition, Review
 from decimal import Decimal
 import random
+from django.utils.timezone import now
+from datetime import timedelta
+from django.db.models import F, Sum, FloatField
+import json
+
 
 
 # Public Home Page
@@ -106,7 +111,7 @@ def dashboard_shop(request):
     search_by = request.GET.get("search_by", "name")  # Default: Search by Name
     selected_category = request.GET.get("category", "")  # Get selected category
 
-    books = Book.objects.all()
+    books = Book.objects.annotate(avg_rating=Avg('review__rating'))  # ✅ Exclude out-of-stock books
     categories = Category.objects.all()  # Get all categories
 
     # Apply search filters
@@ -120,13 +125,17 @@ def dashboard_shop(request):
     if selected_category:
         books = books.filter(categories__id=selected_category)
 
+    # Sort books by highest rating first
+    books = books.order_by('-avg_rating')
+
     return render(request, "dashboard/main.html", {
         "template_name": "dashboard/shop.html",
         "books": books,
         "query": query,
         "search_by": search_by,
-        "categories": categories,  # Pass categories to template
-        "selected_category": selected_category  # Keep track of selected category
+        "categories": categories,
+        "selected_category": selected_category,
+        "range": range(1, 6)  # ✅ Pass range from 1 to 5
     })
 
 
@@ -269,3 +278,53 @@ def decrease_quantity(request, cart_id):
         else:
             cart_item.delete()  # Remove if quantity is 1 and user clicks decrease
     return redirect('cart_view')
+
+
+@login_required(login_url='login')
+def analytics(request):
+    books_sold = OrderItem.objects.count()  
+    total_books_sold = OrderItem.objects.aggregate(total=Sum("quantity"))["total"] or 0  
+
+    total_revenue = Order.objects.filter(status="Paid").aggregate(total=Sum("total_price"))["total"] or 0
+    total_revenue = f"{total_revenue:.2f}"
+
+    total_orders = Order.objects.count()
+    total_requisitions = Requisition.objects.count()
+    total_users = User.objects.count()
+
+    today = now()
+    
+    revenue_last_week = Order.objects.filter(status="Paid", timestamp__gte=today - timedelta(days=7)).aggregate(total=Sum("total_price"))["total"] or 0
+    revenue_last_month = Order.objects.filter(status="Paid", timestamp__gte=today - timedelta(days=30)).aggregate(total=Sum("total_price"))["total"] or 0
+    revenue_last_year = Order.objects.filter(status="Paid", timestamp__gte=today - timedelta(days=365)).aggregate(total=Sum("total_price"))["total"] or 0
+    revenue_overall = Order.objects.filter(status="Paid").aggregate(total=Sum("total_price"))["total"] or 0
+
+    categories = (
+        OrderItem.objects
+        .values("book__categories__name")  # Fetch category names, not IDs
+        .annotate(total_revenue=Sum(F("price"), output_field=FloatField()))
+    )
+
+    category_data = {
+        cat["book__categories__name"]: round(cat["total_revenue"], 2)
+        for cat in categories
+    }
+
+    context = {
+        "books_sold": books_sold,
+        "total_books_sold": total_books_sold,
+        "total_revenue": total_revenue,
+        "total_orders": total_orders,
+        "total_requisitions": total_requisitions,
+        "total_users": total_users,
+        "template_name": "dashboard/analytics.html",
+        "revenue_data": {
+            "last_week": round(revenue_last_week, 2),
+            "last_month": round(revenue_last_month, 2),
+            "last_year": round(revenue_last_year, 2),
+            "overall": round(revenue_overall, 2),
+        },
+        "category_data": json.dumps(category_data)
+    }
+
+    return render(request, "dashboard/main.html", context)

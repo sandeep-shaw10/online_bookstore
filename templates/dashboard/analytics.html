@@ -1,0 +1,153 @@
+<div class="container mx-auto p-6">
+    <h1 class="text-4xl font-bold mb-8">📊 Analytics Dashboard</h1>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <!-- Books Sold -->
+        <div class="bg-blue-500 text-white p-6 rounded-xl shadow-lg flex items-center justify-between">
+            <div>
+                <h2 class="text-xl font-semibold">Books Sold</h2>
+                <p class="text-3xl font-bold">{{ books_sold }}</p>
+            </div>
+            <span class="text-4xl">📚</span>
+        </div>
+
+        <!-- Total Revenue -->
+        <div class="bg-green-500 text-white p-6 rounded-xl shadow-lg flex items-center justify-between">
+            <div>
+                <h2 class="text-xl font-semibold">Total Revenue</h2>
+                <p class="text-3xl font-bold">$ {{ total_revenue }}</p>
+            </div>
+            <span class="text-4xl">💰</span>
+        </div>
+
+        <!-- Total Orders -->
+        <div class="bg-purple-500 text-white p-6 rounded-xl shadow-lg flex items-center justify-between">
+            <div>
+                <h2 class="text-xl font-semibold">Total Orders</h2>
+                <p class="text-3xl font-bold">{{ total_orders }}</p>
+            </div>
+            <span class="text-4xl">📦</span>
+        </div>
+
+        <!-- Total Copies Sold -->
+        <div class="bg-yellow-500 text-white p-6 rounded-xl shadow-lg flex items-center justify-between">
+            <div>
+                <h2 class="text-xl font-semibold">Total Copies Sold</h2>
+                <p class="text-3xl font-bold">{{ total_books_sold }}</p>
+            </div>
+            <span class="text-4xl">📖</span>
+        </div>
+
+        <!-- Total Requisitions -->
+        <div class="bg-red-500 text-white p-6 rounded-xl shadow-lg flex items-center justify-between">
+            <div>
+                <h2 class="text-xl font-semibold">Total Requisitions</h2>
+                <p class="text-3xl font-bold">{{ total_requisitions }}</p>
+            </div>
+            <span class="text-4xl">📜</span>
+        </div>
+
+        <!-- Total Users -->
+        <div class="bg-cyan-500 text-white p-6 rounded-xl shadow-lg flex items-center justify-between">
+            <div>
+                <h2 class="text-xl font-semibold">Total Users</h2>
+                <p class="text-3xl font-bold">{{ total_users }}</p>
+            </div>
+            <span class="text-4xl">👥</span>
+        </div>
+    </div>
+
+    <hr class="my-6 border-gray-300">
+
+    <!-- Filters for Bar Chart -->
+    <h2 class="text-2xl font-semibold  my-6">📈 Revenue Over Time</h2>
+    <div class="flex space-x-4 mb-6">
+        <button class="filter-btn px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700" data-filter="last_week">Last Week</button>
+        <button class="filter-btn px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700" data-filter="last_month">Last Month</button>
+        <button class="filter-btn px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700" data-filter="last_year">Last Year</button>
+        <button class="filter-btn px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700" data-filter="overall">Overall</button>
+    </div>
+
+    <!-- Bar Chart (Income Over Time) -->
+    <div class="bg-white p-6 rounded-xl shadow-lg">
+        <canvas id="incomeChart"></canvas>
+    </div>
+
+    <h2 class="text-2xl font-semibold  my-6">📊 Revenue by Category</h2>
+    <!-- Pie Chart (Income by Category) -->
+    <div class="bg-white p-6 rounded-xl shadow-lg">
+        <canvas id="categoryChart"></canvas>
+    </div>
+</div>
+
+<!-- Chart.js Script -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // 🥧 Pie Chart: Revenue by Category
+        var ctxPie = document.getElementById("categoryChart").getContext("2d");
+
+        var categoryData = JSON.parse('{{ category_data|escapejs }}');  // Ensure JSON safety
+        var categoryLabels = Object.keys(categoryData);  
+        var categoryValues = Object.values(categoryData);  
+
+        console.log(categoryData);  // Debugging JSON data
+
+        new Chart(ctxPie, {
+            type: "pie",
+            data: {
+                labels: categoryLabels,
+                datasets: [{
+                    label: "Revenue by Category",
+                    data: categoryValues,
+                    backgroundColor: ["#1E40AF", "#10B981", "#D97706", "#9333EA", "#DC2626"],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: "bottom" }
+                }
+            }
+        });
+
+        // 📊 Bar Chart: Income Over Time
+        var ctxBar = document.getElementById("incomeChart").getContext("2d");
+        var incomeChart = new Chart(ctxBar, {
+            type: "bar",
+            data: {
+                labels: ["Week 1", "Week 2", "Week 3", "Week 4"],
+                datasets: [{
+                    label: "Income ($)",
+                    data: [5000, 7000, 6000, 8000],  // Dummy data, replace with real data
+                    backgroundColor: "#4F46E5"
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: { beginAtZero: true }
+                }
+            }
+        });
+
+        // 🏷️ Dynamic Filtering for Bar Chart
+        document.querySelectorAll(".filter-btn").forEach(button => {
+            button.addEventListener("click", function () {
+                let filterType = this.getAttribute("data-filter");
+
+                // Fetch new data based on the selected filter
+                let newData;
+                if (filterType === "last_week") newData = [4000, 5000, 6000, 7000];
+                else if (filterType === "last_month") newData = [7000, 8000, 9000, 10000];
+                else if (filterType === "last_year") newData = [50000, 60000, 70000, 80000];
+                else newData = [5000, 7000, 6000, 8000]; // Default overall
+
+                incomeChart.data.datasets[0].data = newData;
+                incomeChart.update();
+            });
+        });
+    });
+</script>
