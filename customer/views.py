@@ -2,8 +2,14 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 
-from store.models import Book
+from store.models import Book, Category, Writer
 from .models import Order, OrderItem, Customer, Cart, Requisition, Review
+
+from django.db.models import Count  # ✅ Add this import
+from mlxtend.frequent_patterns import apriori, association_rules
+import pandas as pd
+from collections import Counter
+import random
 
 
 @login_required(login_url='login')
@@ -183,4 +189,75 @@ def order_history(request):
     return render(request, "dashboard/main.html", {
         "template_name": "dashboard/order_history.html",
         "orders": orders
+    })
+
+
+@login_required(login_url='login')
+def recommended_books(request):
+    """Generate book recommendations based on user history & ML models"""
+    customer = request.user.customer  # Get logged-in customer
+
+    # ✅ Step 1: Get Ordered & Requisitioned Books
+    ordered_books = OrderItem.objects.filter(order__customer=customer).values_list('book', flat=True)
+    requisitioned_books = Requisition.objects.filter(customer=customer).values_list('book', flat=True)
+
+    # ✅ Step 2: Find Common Categories & Authors
+    book_ids = set(ordered_books) | set(requisitioned_books)
+    
+    if book_ids:
+        books = Book.objects.filter(id__in=book_ids, stock__gt=0)  # ✅ Exclude out-of-stock books
+
+        # Get frequently appearing categories & authors
+        categories = books.values_list('categories', flat=True)
+        authors = books.values_list('authors', flat=True)
+
+        top_categories = [c[0] for c in Counter(categories).most_common(3)]
+        top_authors = [a[0] for a in Counter(authors).most_common(3)]
+
+        # Recommend books based on category & author (excluding already purchased/requested books)
+        category_books = Book.objects.filter(categories__in=top_categories, stock__gt=0).exclude(id__in=book_ids).distinct()
+        author_books = Book.objects.filter(authors__in=top_authors, stock__gt=0).exclude(id__in=book_ids).distinct()
+    else:
+        # ✅ Step 3: If No Order/Requisition, Suggest Random Books Based on Category & Author
+        category_books = Book.objects.filter(categories__in=Category.objects.all(), stock__gt=0).order_by("?")[:4]
+        author_books = Book.objects.filter(authors__in=Writer.objects.all(), stock__gt=0).order_by("?")[:4]
+
+    # ✅ Step 4: Suggest 4 Most Popular Books
+    popular_books = Book.objects.filter(stock__gt=0).annotate(total_sales=Count('orderitem')).order_by('-total_sales')[:4]
+
+    # ✅ Step 5: Apply ML-Based Recommendations (Apriori)
+    transactions = []
+    orders = OrderItem.objects.all().values('order_id', 'book_id')
+
+    # Build transaction list for Apriori
+    transaction_dict = {}
+    for order in orders:
+        transaction_dict.setdefault(order['order_id'], []).append(str(order['book_id']))
+    
+    transactions = list(transaction_dict.values())
+
+    ml_recommended_books = []
+    if transactions:
+        df = pd.DataFrame(transactions).fillna(0)
+        book_dummy = pd.get_dummies(df.stack()).groupby(level=0).sum()
+
+        frequent_itemsets = apriori(book_dummy, min_support=0.1, use_colnames=True)
+        rules = association_rules(frequent_itemsets, metric="lift", min_threshold=1.2)
+
+        if not rules.empty:
+            book_ids = set()
+            for itemset in rules.sort_values('lift', ascending=False).head(5)['consequents']:
+                book_ids.update(itemset)
+
+            ml_recommended_books = Book.objects.filter(id__in=book_ids, stock__gt=0)  # ✅ Exclude out-of-stock books
+
+    # ✅ Combine All Recommendations (Ensuring Uniqueness)
+    recommended_books = list(set(popular_books) | set(category_books) | set(author_books) | set(ml_recommended_books))
+
+    return render(request, "dashboard/main.html", {
+        "template_name": "dashboard/recommendations.html",
+        "recommended_books": recommended_books,
+        "popular_books": popular_books,
+        "category_books": category_books,
+        "author_books": author_books
     })

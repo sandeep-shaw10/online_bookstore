@@ -53,6 +53,7 @@ urlpatterns = [
     path('review/submit/<int:book_id>/', submit_review, name='submit_review'),
     path('review/delete/<int:review_id>/', delete_review, name='delete_review'),
     path('order/history/', order_history, name='order_history'),
+    path('recommendations/', recommended_books, name='recommendations'),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

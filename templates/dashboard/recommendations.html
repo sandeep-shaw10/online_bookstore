@@ -1,0 +1,95 @@
+{% load static %}
+
+<main class="flex-1 p-6">
+    <div class="bg-white shadow-lg rounded-lg p-6">
+        <h2 class="text-2xl font-bold text-gray-800 mb-4">📚 Recommended Books</h2>
+
+        <!-- ✅ Loader with Image and Dynamic Text -->
+        <div id="loader" class="text-center text-gray-600 text-lg opacity-100 animate-blink flex flex-col items-center">
+            <img src="{% static 'image/book.png' %}" alt="Loading" class="w-1/4 h-1/4 mb-2">
+            ⏳ Recommending Books Based on your <span id="recommendation-type" class="bold text-purple-800">Interests</span>...
+        </div>
+
+        <!-- ✅ Main Content (Initially Hidden) -->
+        <div id="content" class="hidden">
+
+            <!-- 🤖 AI-Powered Recommendations -->
+            <h3 class="text-lg font-semibold text-gray-800 mt-6">🤖 AI-Powered Book Suggestions</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
+                {% for book in recommended_books %}
+                    {% include "dashboard/book_card.html" with book=book %}
+                {% empty %}
+                    <p class="text-gray-600 col-span-full text-center">⚠️ No AI-powered recommendations available.</p>
+                {% endfor %}
+            </div>
+
+            <!-- 🔥 Most Popular Books -->
+            <h3 class="text-lg font-semibold text-gray-800 mt-6">🔥 Most Popular Books</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
+                {% for book in popular_books %}
+                    {% include "dashboard/book_card.html" with book=book %}
+                {% empty %}
+                    <p class="text-gray-600 col-span-full text-center">⚠️ No popular books available.</p>
+                {% endfor %}
+            </div>
+
+            <!-- 🏷️ Category-Based Recommendations -->
+            <h3 class="text-lg font-semibold text-gray-800 mt-6">🏷️ Books Based on Your Favorite Categories</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
+                {% for book in category_books %}
+                    {% include "dashboard/book_card.html" with book=book %}
+                {% empty %}
+                    <p class="text-gray-600 col-span-full text-center">⚠️ No category-based recommendations available.</p>
+                {% endfor %}
+            </div>
+
+            <!-- ✍️ Author-Based Recommendations -->
+            <h3 class="text-lg font-semibold text-gray-800 mt-6">✍️ Books From Your Favorite Authors</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
+                {% for book in author_books %}
+                    {% include "dashboard/book_card.html" with book=book %}
+                {% empty %}
+                    <p class="text-gray-600 col-span-full text-center">⚠️ No author-based recommendations available.</p>
+                {% endfor %}
+            </div>
+
+        </div>
+    </div>
+</main>
+
+<!-- ✅ JavaScript for Smooth Loader Effect -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // Dynamic text options for recommendation type
+        const recommendationTypes = ["Interests", "Reading History", "Favorite Genres", "Past Purchases"];
+        let index = 0;
+
+        // Change text every 1.5 seconds
+        setInterval(() => {
+            document.getElementById("recommendation-type").innerText = recommendationTypes[index];
+            index = (index + 1) % recommendationTypes.length;
+        }, 500);
+
+        // ✅ Randomize delay between 2 and 10 seconds
+        const randomDelay = Math.floor(Math.random() * (10000 - 2000 + 1)) + 2000;  // Random time between 2000ms (2s) and 10000ms (10s)
+
+        setTimeout(() => {
+            document.getElementById("loader").style.display = "none";  // Hide loader
+            document.getElementById("content").classList.remove("hidden"); // Show content
+        }, 2500);
+
+        });
+
+</script>
+
+<!-- ✅ CSS for Blinking Effect -->
+<style>
+    @keyframes blink {
+        0% { opacity: 1; }
+        50% { opacity: 0.5; }
+        100% { opacity: 1; }
+    }
+    .animate-blink {
+        animation: blink 1s infinite;
+    }
+</style>
