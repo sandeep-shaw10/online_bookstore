@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.db.models import Q, Avg, Sum, Count
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.models import User
 from store.models import Book, Writer, Category
 from django.contrib import messages
@@ -15,6 +15,10 @@ from django.db.models import F, Sum, FloatField
 import json
 
 
+
+# Function to check if user is admin
+def is_admin(user):
+    return user.is_authenticated and user.is_staff 
 
 # Public Home Page
 def home(request):
@@ -281,6 +285,7 @@ def decrease_quantity(request, cart_id):
 
 
 @login_required(login_url='login')
+@user_passes_test(is_admin, login_url='login')  # Redirect non-admins to login
 def analytics(request):
     books_sold = OrderItem.objects.count()  
     total_books_sold = OrderItem.objects.aggregate(total=Sum("quantity"))["total"] or 0  
@@ -291,13 +296,6 @@ def analytics(request):
     total_orders = Order.objects.count()
     total_requisitions = Requisition.objects.count()
     total_users = User.objects.count()
-
-    today = now()
-    
-    revenue_last_week = Order.objects.filter(status="Paid", timestamp__gte=today - timedelta(days=7)).aggregate(total=Sum("total_price"))["total"] or 0
-    revenue_last_month = Order.objects.filter(status="Paid", timestamp__gte=today - timedelta(days=30)).aggregate(total=Sum("total_price"))["total"] or 0
-    revenue_last_year = Order.objects.filter(status="Paid", timestamp__gte=today - timedelta(days=365)).aggregate(total=Sum("total_price"))["total"] or 0
-    revenue_overall = Order.objects.filter(status="Paid").aggregate(total=Sum("total_price"))["total"] or 0
 
     categories = (
         OrderItem.objects
@@ -310,6 +308,30 @@ def analytics(request):
         for cat in categories
     }
 
+    today = now()
+
+    # Revenue calculations with Decimal to float conversion
+    def get_revenue(queryset):
+        total = queryset.aggregate(total=Sum("total_price"))["total"] or Decimal(0)
+        return float(total)  # Convert to float to make it JSON serializable
+
+    revenue_today = get_revenue(Order.objects.filter(status="Paid", timestamp__date=today.date()))
+    revenue_this_week = get_revenue(Order.objects.filter(status="Paid", timestamp__gte=today - timedelta(days=7)))
+    revenue_this_month = get_revenue(Order.objects.filter(status="Paid", timestamp__gte=today - timedelta(days=30)))
+    revenue_last_3_months = get_revenue(Order.objects.filter(status="Paid", timestamp__gte=today - timedelta(days=90)))
+    revenue_this_year = get_revenue(Order.objects.filter(status="Paid", timestamp__gte=today - timedelta(days=365)))
+    revenue_overall = get_revenue(Order.objects.filter(status="Paid"))
+
+    # Store revenue data in JSON-safe format
+    revenue_data = {
+        "today": round(revenue_today, 2),
+        "this_week": round(revenue_this_week, 2),
+        "this_month": round(revenue_this_month, 2),
+        "last_3_months": round(revenue_last_3_months, 2),
+        "this_year": round(revenue_this_year, 2),
+        "overall": round(revenue_overall, 2),
+    }
+
     context = {
         "books_sold": books_sold,
         "total_books_sold": total_books_sold,
@@ -318,12 +340,7 @@ def analytics(request):
         "total_requisitions": total_requisitions,
         "total_users": total_users,
         "template_name": "dashboard/analytics.html",
-        "revenue_data": {
-            "last_week": round(revenue_last_week, 2),
-            "last_month": round(revenue_last_month, 2),
-            "last_year": round(revenue_last_year, 2),
-            "overall": round(revenue_overall, 2),
-        },
+        "revenue_data": json.dumps(revenue_data),
         "category_data": json.dumps(category_data)
     }
 

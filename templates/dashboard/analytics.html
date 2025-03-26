@@ -6,7 +6,7 @@
         <div class="bg-blue-500 text-white p-6 rounded-xl shadow-lg flex items-center justify-between">
             <div>
                 <h2 class="text-xl font-semibold">Books Sold</h2>
-                <p class="text-3xl font-bold">{{ books_sold }}</p>
+                <p class="text-3xl font-bold count" data-target="{{ books_sold }}">0</p>
             </div>
             <span class="text-4xl">📚</span>
         </div>
@@ -14,8 +14,8 @@
         <!-- Total Revenue -->
         <div class="bg-green-500 text-white p-6 rounded-xl shadow-lg flex items-center justify-between">
             <div>
-                <h2 class="text-xl font-semibold">Total Revenue</h2>
-                <p class="text-3xl font-bold">$ {{ total_revenue }}</p>
+                <h2 class="text-xl font-semibold">Total Revenue ($)</h2>
+                <p class="text-3xl font-bold count" data-target="{{ total_revenue }}">0</p>
             </div>
             <span class="text-4xl">💰</span>
         </div>
@@ -24,7 +24,7 @@
         <div class="bg-purple-500 text-white p-6 rounded-xl shadow-lg flex items-center justify-between">
             <div>
                 <h2 class="text-xl font-semibold">Total Orders</h2>
-                <p class="text-3xl font-bold">{{ total_orders }}</p>
+                <p class="text-3xl font-bold count" data-target="{{ total_orders }}">0</p>
             </div>
             <span class="text-4xl">📦</span>
         </div>
@@ -33,7 +33,7 @@
         <div class="bg-yellow-500 text-white p-6 rounded-xl shadow-lg flex items-center justify-between">
             <div>
                 <h2 class="text-xl font-semibold">Total Copies Sold</h2>
-                <p class="text-3xl font-bold">{{ total_books_sold }}</p>
+                <p class="text-3xl font-bold count" data-target="{{ total_books_sold }}">0</p>
             </div>
             <span class="text-4xl">📖</span>
         </div>
@@ -42,7 +42,7 @@
         <div class="bg-red-500 text-white p-6 rounded-xl shadow-lg flex items-center justify-between">
             <div>
                 <h2 class="text-xl font-semibold">Total Requisitions</h2>
-                <p class="text-3xl font-bold">{{ total_requisitions }}</p>
+                <p class="text-3xl font-bold count" data-target="{{ total_requisitions }}">0</p>
             </div>
             <span class="text-4xl">📜</span>
         </div>
@@ -51,33 +51,65 @@
         <div class="bg-cyan-500 text-white p-6 rounded-xl shadow-lg flex items-center justify-between">
             <div>
                 <h2 class="text-xl font-semibold">Total Users</h2>
-                <p class="text-3xl font-bold">{{ total_users }}</p>
+                <p class="text-3xl font-bold count" data-target="{{ total_users }}">0</p>
             </div>
             <span class="text-4xl">👥</span>
         </div>
     </div>
+    </div>
 
-    <hr class="my-6 border-gray-300">
+    <hr class="my-6 mx-8 border-gray-300">
 
     <!-- Filters for Bar Chart -->
-    <h2 class="text-2xl font-semibold  my-6">📈 Revenue Over Time</h2>
-    <div class="flex space-x-4 mb-6">
-        <button class="filter-btn px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700" data-filter="last_week">Last Week</button>
-        <button class="filter-btn px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700" data-filter="last_month">Last Month</button>
-        <button class="filter-btn px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700" data-filter="last_year">Last Year</button>
-        <button class="filter-btn px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700" data-filter="overall">Overall</button>
+    <div class="mx-8">
+        <h2 class="text-2xl font-semibold my-6">💰 Revenue Overview</h2>
+    
+        <!-- Cards for Revenue Summary -->
+        <div class="grid grid-cols-3 gap-6 mb-6">
+            <div class="bg-blue-100 p-6 rounded-lg text-center shadow-lg">
+                <h3 class="text-xl font-semibold">Today</h3>
+                <p class="text-2xl font-bold text-blue-600" id="revenue_today">$0.00</p>
+            </div>
+            <div class="bg-green-100 p-6 rounded-lg text-center shadow-lg">
+                <h3 class="text-xl font-semibold">This Week</h3>
+                <p class="text-2xl font-bold text-green-600" id="revenue_this_week">$0.00</p>
+            </div>
+            <div class="bg-yellow-100 p-6 rounded-lg text-center shadow-lg">
+                <h3 class="text-xl font-semibold">This Month</h3>
+                <p class="text-2xl font-bold text-yellow-600" id="revenue_this_month">$0.00</p>
+            </div>
+            <div class="bg-purple-100 p-6 rounded-lg text-center shadow-lg">
+                <h3 class="text-xl font-semibold">Last 3 Months</h3>
+                <p class="text-2xl font-bold text-purple-600" id="revenue_last_3_months">$0.00</p>
+            </div>
+            <div class="bg-red-100 p-6 rounded-lg text-center shadow-lg">
+                <h3 class="text-xl font-semibold">This Year</h3>
+                <p class="text-2xl font-bold text-red-600" id="revenue_this_year">$0.00</p>
+            </div>
+            <div class="bg-gray-100 p-6 rounded-lg text-center shadow-lg">
+                <h3 class="text-xl font-semibold">Overall</h3>
+                <p class="text-2xl font-bold text-gray-600" id="revenue_overall">$0.00</p>
+            </div>
+        </div>
+    
+        <!-- Line Chart (Revenue Trend) -->
+        <div class="bg-white p-6 rounded-xl shadow-lg" style="height: 400px;">  <!-- Increased height -->
+            <canvas id="revenueTrendChart"></canvas>
+        </div>
+
+    </div>
+    
+
+    <hr class="my-6 mx-8 border-gray-300">
+
+    <div class="mx-8">
+        <h2 class="text-2xl font-semibold  my-6">📊 Revenue by Category</h2>
+        <!-- Pie Chart (Income by Category) -->
+        <div class="bg-white p-6 rounded-xl shadow-lg">
+            <canvas id="categoryChart"></canvas>
+        </div>
     </div>
 
-    <!-- Bar Chart (Income Over Time) -->
-    <div class="bg-white p-6 rounded-xl shadow-lg">
-        <canvas id="incomeChart"></canvas>
-    </div>
-
-    <h2 class="text-2xl font-semibold  my-6">📊 Revenue by Category</h2>
-    <!-- Pie Chart (Income by Category) -->
-    <div class="bg-white p-6 rounded-xl shadow-lg">
-        <canvas id="categoryChart"></canvas>
-    </div>
 </div>
 
 <!-- Chart.js Script -->
@@ -112,42 +144,114 @@
             }
         });
 
-        // 📊 Bar Chart: Income Over Time
-        var ctxBar = document.getElementById("incomeChart").getContext("2d");
-        var incomeChart = new Chart(ctxBar, {
-            type: "bar",
-            data: {
-                labels: ["Week 1", "Week 2", "Week 3", "Week 4"],
-                datasets: [{
-                    label: "Income ($)",
-                    data: [5000, 7000, 6000, 8000],  // Dummy data, replace with real data
-                    backgroundColor: "#4F46E5"
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    y: { beginAtZero: true }
+        let revenueData = JSON.parse('{{ revenue_data|safe }}');
+
+        // Update cards with revenue data
+        document.getElementById("revenue_today").innerText = `$${revenueData.today}`;
+        document.getElementById("revenue_this_week").innerText = `$${revenueData.this_week}`;
+        document.getElementById("revenue_this_month").innerText = `$${revenueData.this_month}`;
+        document.getElementById("revenue_last_3_months").innerText = `$${revenueData.last_3_months}`;
+        document.getElementById("revenue_this_year").innerText = `$${revenueData.this_year}`;
+        document.getElementById("revenue_overall").innerText = `$${revenueData.overall}`;
+
+        // Line Chart
+        var ctxBar = document.getElementById("revenueTrendChart").getContext("2d");
+
+var revenueTrendChart = new Chart(ctxBar, {
+    type: "bar",
+    data: {
+        labels: ["Today", "This Week", "This Month", "Last 3 Months", "This Year", "Overall"],
+        datasets: [{
+            label: "Revenue ($)",
+            data: Object.values(revenueData),
+            backgroundColor: [
+                "rgba(79, 70, 229, 0.7)",   // Purple
+                "rgba(16, 185, 129, 0.7)",  // Green
+                "rgba(217, 119, 6, 0.7)",   // Orange
+                "rgba(147, 51, 234, 0.7)",  // Purple
+                "rgba(220, 38, 38, 0.7)",   // Red
+                "rgba(107, 114, 128, 0.7)"  // Gray
+            ], // 70% opacity
+            borderColor: [
+                "#4F46E5", "#10B981", "#D97706", "#9333EA", "#DC2626", "#6B7280"
+            ],
+            borderWidth: 2, // 🔹 Visible borders
+            hoverBackgroundColor: "rgba(0, 0, 0, 0.2)" // Darker on hover
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+            y: {
+                beginAtZero: true
+            }
+        },
+        plugins: {
+            legend: {
+                position: "bottom",
+                labels: {
+                    usePointStyle: true
                 }
             }
-        });
+        },
+        onClick: function(event, elements) {
+            if (elements.length > 0) {
+                var index = elements[0].index;
+                revenueTrendChart.getDatasetMeta(0).data[index].hidden = !revenueTrendChart.getDatasetMeta(0).data[index].hidden;
+                revenueTrendChart.update();
+            }
+        }
+    }
+});
 
-        // 🏷️ Dynamic Filtering for Bar Chart
-        document.querySelectorAll(".filter-btn").forEach(button => {
-            button.addEventListener("click", function () {
-                let filterType = this.getAttribute("data-filter");
 
-                // Fetch new data based on the selected filter
-                let newData;
-                if (filterType === "last_week") newData = [4000, 5000, 6000, 7000];
-                else if (filterType === "last_month") newData = [7000, 8000, 9000, 10000];
-                else if (filterType === "last_year") newData = [50000, 60000, 70000, 80000];
-                else newData = [5000, 7000, 6000, 8000]; // Default overall
 
-                incomeChart.data.datasets[0].data = newData;
-                incomeChart.update();
+
+        /*
+const config = {
+  type: 'bar',
+  data: data,
+  options: {
+    responsive: true,
+    plugins: {
+      legend: {
+        position: 'top',
+      },
+      title: {
+        display: true,
+        text: 'Chart.js Bar Chart'
+      }
+    }
+  },
+}
+        */
+
+        // Count Up Animations
+        window.onload = function () {
+            function animateCount(element, target) {
+                let start = 0;
+                let duration = 3000;
+                let step = Math.ceil(target / (duration / 30));
+                function update() {
+                    start += step;
+                    if (start >= target) {
+                        element.innerText = target;
+                    } else {
+                        element.innerText = start;
+                        requestAnimationFrame(update);
+                    }
+                }
+                update();
+            }
+
+            const counters = document.querySelectorAll(".count");
+            counters.forEach(counter => {
+                const target = parseInt(counter.getAttribute("data-target"));
+                animateCount(counter, target);
             });
-        });
+        };
+
+
     });
 </script>
