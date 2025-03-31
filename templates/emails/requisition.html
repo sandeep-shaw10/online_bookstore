@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f4f4; padding: 20px; }
+        .container { max-width: 600px; background: #fff; padding: 20px; border-radius: 8px; }
+        .logo { text-align: center; margin-bottom: 20px; }
+        .logo img { max-width: 400px; height: auto; }
+        .book-details { padding: 15px; border-top: 2px solid #ddd; }
+        .book-summary { margin-top: 10px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f4f4f4; }
+        .footer { text-align: center; font-size: 12px; margin-top: 20px; color: #777; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">
+            <img src="https://drive.google.com/uc?export=view&id=1O93x6igJ-QtXwoCKaGwa502KLu_4eWhr" alt="Book Logo">
+        </div>
+        <h2>📖 Your Requested Book is Now Available!</h2>
+        <p>Hello {{ customer.user.username }},</p>
+        <p>Great news! The book you requested, <b>{{ book.name }}</b>, is now available in our store! 🎉</p>
+
+        <div class="book-details">
+            <h3>📌 Book Details</h3>
+            <table>
+                <tr>
+                    <th>Title</th>
+                    <th>Author(s)</th>
+                    <th>Price</th>
+                </tr>
+                <tr>
+                    <td>{{ book.name }}</td>
+                    <td>{{ book.authors.first.name }}</td>
+                    <td>${{ book.price }}</td>
+                </tr>
+            </table>
+
+            <h4>🔗 Grab Your Copy Now:</h4>
+            <p><a href="{{ book_link }}" style="background: #4CAF50; color: white; padding: 10px 15px; text-decoration: none; border-radius: 5px;">View Book</a></p>
+        </div>
+
+        <p>Thank you for choosing <b>BookHaven</b>. Happy Reading! 📚</p>
+        
+        <div class="footer">
+            &copy; 2025 BookHaven. All Rights Reserved.
+        </div>
+    </div>
+</body>
+</html>

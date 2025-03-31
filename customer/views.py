@@ -11,6 +11,12 @@ import pandas as pd
 from collections import Counter
 from django.db.models import Count, Avg  # ✅ Import Avg
 
+from django.core.mail import send_mail
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
+from django.conf import settings
+
+
 
 @login_required(login_url='login')
 def e_purse_checkout(request, order_id):
@@ -38,37 +44,59 @@ def e_purse_checkout(request, order_id):
                 cart_item.save()
                 stock_adjusted = True
 
-        # If stock was adjusted, redirect to the cart page
         if stock_adjusted:
-            return redirect("cart_view")  # ✅ Redirect user back to cart
+            return redirect("cart_view")  # Redirect user back to cart
 
         # Check if E-Purse balance is sufficient
         if customer.e_purse_balance >= order.total_price:
-            # Deduct the amount from E-Purse
             customer.e_purse_balance -= order.total_price
             customer.save()
 
-            # Save the full shipping address and mark order as paid
+            # Save shipping address and mark order as paid
             order.status = "Paid"
             order.payment_mode = "E-Purse"
             order.address = f"{address}, {state}, {pincode}, {country}"
             order.save()
 
             # ✅ Insert items from cart into OrderItem table & Reduce Stock
+            order_items = []
             for cart_item in cart_items:
-                OrderItem.objects.create(
+                order_item = OrderItem.objects.create(
                     order=order,
                     book=cart_item.book,
                     quantity=cart_item.quantity,
-                    price=cart_item.book.price * cart_item.quantity  # Store total price of that item
+                    price=cart_item.book.price * cart_item.quantity
                 )
 
-                # ✅ Reduce book stock
+                order_items.append(order_item)  # Collect items for email
+
                 cart_item.book.stock -= cart_item.quantity
                 cart_item.book.save()
 
             # ✅ Clear the user's cart
             cart_items.delete()
+
+            # ✅ Send Email Notification
+            subject = "📚 BookHaven: Your Order Confirmation"
+            customer_email = request.user.email  # Get user's email
+
+            # Render HTML email template
+            html_message = render_to_string("emails/order_confirmation.html", {
+                "customer": customer,
+                "order": order,
+                "order_items": order_items,
+                "company_name": "BookHaven",
+                "company_logo": f"{settings.STATIC_URL}images/bookhaven_logo.png"
+            })
+            plain_message = strip_tags(html_message)  # Convert HTML to plain text
+
+            send_mail(
+                subject,
+                plain_message,
+                settings.DEFAULT_FROM_EMAIL,  # Sender email (configured in settings)
+                [customer_email],  # Recipient email
+                html_message=html_message
+            )
 
             messages.success(request, "✅ Payment successful! Your order has been placed.")
             return redirect("order_success")  # Redirect to success page
