@@ -194,16 +194,17 @@ def order_history(request):
 
 @login_required(login_url='login')
 def recommended_books(request):
-    """Generate book recommendations using ML & traditional filtering"""
+    """Generate book recommendations using ML, wishlist, & traditional filtering"""
     customer = request.user.customer  # Get logged-in customer
 
-    # ✅ Step 1: Get Ordered & Requisitioned Books
+    # ✅ Step 1: Get Ordered, Requisitioned, & Wishlisted Books
     ordered_books = OrderItem.objects.filter(order__customer=customer).values_list('book', flat=True)
     requisitioned_books = Requisition.objects.filter(customer=customer).values_list('book', flat=True)
+    wishlist_books = Wishlist.objects.filter(user=request.user).values_list('book', flat=True)  # ✅ Fixed error
 
-    # ✅ Step 2: Find Common Categories & Authors
-    book_ids = set(ordered_books) | set(requisitioned_books)
-    
+    # Merge all book IDs
+    book_ids = set(ordered_books) | set(requisitioned_books) | set(wishlist_books)
+
     if book_ids:
         books = Book.objects.filter(id__in=book_ids, stock__gt=0)  # ✅ Exclude out-of-stock books
 
@@ -214,17 +215,17 @@ def recommended_books(request):
         top_categories = [c[0] for c in Counter(categories).most_common(3)]
         top_authors = [a[0] for a in Counter(authors).most_common(3)]
 
-        # ✅ Recommend books based on category (fallback to random if empty)
+        # ✅ Recommend books based on category (fallback to random)
         category_books = Book.objects.filter(categories__in=top_categories, stock__gt=0).exclude(id__in=book_ids).distinct()
         if not category_books.exists():
             category_books = Book.objects.filter(stock__gt=0).order_by("?")[:4]  # ✅ Return random books if empty
 
-        # ✅ Recommend books based on author (fallback to random if empty)
+        # ✅ Recommend books based on author (fallback to random)
         author_books = Book.objects.filter(authors__in=top_authors, stock__gt=0).exclude(id__in=book_ids).distinct()
         if not author_books.exists():
             author_books = Book.objects.filter(stock__gt=0).order_by("?")[:4]  # ✅ Return random books if empty
     else:
-        # ✅ If No Order/Requisition, Suggest Random Books Based on Category & Author
+        # ✅ If No Order/Requisition/Wishlist, Suggest Random Books
         category_books = Book.objects.filter(stock__gt=0).order_by("?")[:4]
         author_books = Book.objects.filter(stock__gt=0).order_by("?")[:4]
 
@@ -250,7 +251,7 @@ def recommended_books(request):
 
             # ✅ Convert to Binary Format (0 or 1)
             book_dummy = pd.get_dummies(df.stack()).groupby(level=0).sum()
-            book_dummy = book_dummy.applymap(lambda x: 1 if x > 0 else 0)  # ✅ Convert to 1 (bought) or 0 (not bought)
+            book_dummy = book_dummy.astype(bool)
 
             # ✅ Apply Apriori Algorithm
             frequent_itemsets = apriori(book_dummy, min_support=0.1, use_colnames=True)

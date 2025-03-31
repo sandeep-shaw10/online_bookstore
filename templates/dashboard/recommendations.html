@@ -61,14 +61,14 @@
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         // Dynamic text options for recommendation type
-        const recommendationTypes = ["Interests", "Reading History", "Favorite Genres", "Past Purchases"];
+        const recommendationTypes = ["Wishlists", "Reading History", "Favorite Genres", "Past Purchases"];
         let index = 0;
 
         // Change text every 1.5 seconds
         setInterval(() => {
             document.getElementById("recommendation-type").innerText = recommendationTypes[index];
             index = (index + 1) % recommendationTypes.length;
-        }, 1250);
+        }, 625);
 
         // ✅ Randomize delay between 2 and 10 seconds
         const randomDelay = Math.floor(Math.random() * (10000 - 2000 + 1)) + 2000;  // Random time between 2000ms (2s) and 10000ms (10s)
@@ -76,7 +76,7 @@
         setTimeout(() => {
             document.getElementById("loader").style.display = "none";  // Hide loader
             document.getElementById("content").classList.remove("hidden"); // Show content
-        }, 5000);
+        }, 2500);
 
         });
 
