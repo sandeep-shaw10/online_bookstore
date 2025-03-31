@@ -55,6 +55,9 @@ urlpatterns = [
     path('order/history/', order_history, name='order_history'),
     path('recommendations/', recommended_books, name='recommendations'),
     path('analytics/', analytics, name='analytics'),
+    path('dashboard/wishlist/', wishlist, name='wishlist'),
+    path('dashboard/wishlist/add/<int:book_id>/', add_to_wishlist, name='add_to_wishlist'),
+    path('dashboard/wishlist/remove/<int:book_id>/', remove_from_wishlist, name='remove_from_wishlist')
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

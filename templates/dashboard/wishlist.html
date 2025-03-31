@@ -1,0 +1,24 @@
+<main class="flex-1 p-4 md:p-6">
+    <div class="bg-white shadow-md rounded-lg p-6">
+        <h2 class="text-2xl font-semibold text-gray-800">⭐ Your Wishlist</h2>
+
+        {% if wishlist_books %}
+            <div class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+                {% for item in wishlist_books %}
+                    <div class="bg-gray-100 p-4 rounded-lg shadow-md">
+                        <img src="{{ item.book.cover_image.url }}" alt="{{ item.book.name }}" class="w-full h-64 object-cover rounded-lg">
+                        <h3 class="text-lg font-semibold mt-2">{{ item.book.name }}</h3>
+                        <p class="text-gray-600">${{ item.book.price }}</p>
+
+                        <div class="mt-2 flex space-x-2">
+                            <a href="{% url 'book_detail' item.book.id %}" class="text-blue-500">📖 View</a>
+                            <a href="{% url 'remove_from_wishlist' item.book.id %}" class="text-red-500">❌ Remove</a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="text-gray-600 mt-4">⚠️ Your wishlist is empty.</p>
+        {% endif %}
+    </div>
+</main>

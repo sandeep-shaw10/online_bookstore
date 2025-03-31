@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 
 from store.models import Book, Category, Writer
-from .models import Order, OrderItem, Customer, Cart, Requisition, Review
+from .models import Order, OrderItem, Customer, Cart, Requisition, Review, Wishlist
 
 from django.db.models import Count  # ✅ Add this import
 from mlxtend.frequent_patterns import apriori, association_rules
@@ -285,4 +285,27 @@ def recommended_books(request):
         "category_books": category_books,
         "author_books": author_books,
         "range": range(1, 6)  # ✅ Pass range from 1 to 5
+    })
+
+
+@login_required
+def add_to_wishlist(request, book_id):
+    book = get_object_or_404(Book, id=book_id)
+    Wishlist.objects.get_or_create(user=request.user, book=book)
+    messages.success(request, f"Added to Wishlist")
+    return redirect('book_detail', book_id=book_id)
+
+@login_required
+def remove_from_wishlist(request, book_id):
+    book = get_object_or_404(Book, id=book_id)
+    Wishlist.objects.filter(user=request.user, book=book).delete()
+    messages.success(request, f"Removed from Wishlist")
+    return redirect('book_detail', book_id=book_id)
+
+@login_required
+def wishlist(request):
+    wishlist_books = Wishlist.objects.filter(user=request.user)
+    return render(request, "dashboard/main.html", {
+        "template_name": "dashboard/wishlist.html",
+        "wishlist_books": wishlist_books
     })
