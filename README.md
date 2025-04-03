@@ -1,15 +1,8 @@
-# Online Bookstore
-- Display in Home Page
-- Write Review and Rating
-- Add to Cart
-- Payment
+# Online Bookstore: BookHaven
 
-- Requisition
-- Notification
 
-- Admin Graph
-- Total Sales
-
-- Recommendation
-
-- Final Touch (About,Contact,Authors, etc,.)
+### Contributors
+- Pratham Savane    (24MT0311)
+- Rahul Kapardar    (24MT0331)
+- Sandeep Shaw      (24MT0388)
+- Saumya Agrawal    (24MT0403)
